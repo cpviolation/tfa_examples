@@ -1,0 +1,8 @@
+jupyter
+particle
+tensorflow[and-cuda]
+scipy
+matplotlib
+numpy
+../AmpliTF
+../TFA2
