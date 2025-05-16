@@ -1,0 +1,9 @@
+jupyter
+particle
+tensorflow-macos
+tensorflow-metal
+scipy
+matplotlib
+numpy
+../AmpliTF
+../TFA2
