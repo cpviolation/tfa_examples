@@ -1,9 +1,10 @@
+import os
 import matplotlib.pyplot as plt
 import tfa.plotting as tfp
 
 def decode_model(fname):
     parameter_names = {}
-    with open('files/belle_model_definitions.txt', 'r') as f:
+    with open(os.environ['TFAEX_ROOT']+'/notebooks/files/belle_model_definitions.txt', 'r') as f:
         for l in f:
             values = l.split()
             if len(values) == 0:
