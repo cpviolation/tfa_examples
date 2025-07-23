@@ -2,7 +2,7 @@
 Examples with TensorFlowAnalysis2
 
 To install:
- - clone AmpliTF and TFA2 in the same directory as `tfa_examples`
+ - clone [AmpliTF](https://github.com/cpviolation/AmpliTF) and [TFA2](https://github.com/cpviolation/TFA2) in the same directory as `tfa_examples`
  - prepare a python environment
    ```bash
    python3 -m venv tfa
