@@ -40,6 +40,7 @@ parser.add_argument("-x", type=float, default=0.004, help="Value of x for the mi
 parser.add_argument("-y", type=float, default=0.0064, help="Value of y for the mixing model")
 parser.add_argument("-qop", type=float, default=1.0, help="Absolute value of q/p for CP violation")
 parser.add_argument("-qop_phase", type=float, default=0.0, help="Phase of q/p for CP violation")
+parser.add_argument("--output", type=str, default='d02kspipi_toy', help="Output file name for the toy MC sample")
 parser.add_argument("--dryrun", action="store_true", help="Run without executing the main function")
 args = parser.parse_args()
 
@@ -170,6 +171,10 @@ def toymc_mixing_model(x):
         qoverp_im=atfi.const(args.qop) * atfi.sin(atfi.const(args.qop_phase))
         )
 
+def apply_acceptance(data):
+    
+    return 
+
 
 def main():
     start_time = time.time()
@@ -179,7 +184,7 @@ def main():
     end_time = time.time()
     print(f"Generated {args.ntoys} toys in {end_time - start_time:.2f} seconds.")
     # save data to file
-    file_name = os.environ['TFAEX_ROOT']+'/../output/d02kspipi_toy.npy'
+    file_name = os.environ['TFAEX_ROOT']+'/../output/'+args.output+'.npy'
     np.save(file_name,toy_sample.numpy())
     
     return
