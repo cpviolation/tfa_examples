@@ -2,7 +2,7 @@ jupyter
 particle
 tensorflow-macos
 tensorflow-metal
-tensorflow-probability[tf]
+tensorflow-probability[tf]==0.24.0
 scipy
 matplotlib
 numpy
