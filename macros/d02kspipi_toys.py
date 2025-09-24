@@ -50,7 +50,7 @@ mpi = atfi.const(lp.pi_plus.mass/1000)
 md = atfi.const(lp.D_0.mass/1000)
 meta = atfi.const(lp.eta.mass/1000.)
 metap = atfi.const(lp.etap_958.mass/1000.)
-belle_model = decode_model(os.environ['TFAEX_ROOT']+'/../d02kspipi_toys/generator/inputs/belle_model.txt')
+belle_model = decode_model(os.environ['TFAEX_ROOT']+'/params/belle_model.txt')
 
 #Define the phase space for the decay D0 -> Kspipi.
 # Create Dalitz Phase Space
