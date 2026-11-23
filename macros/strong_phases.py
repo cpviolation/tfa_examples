@@ -1,67 +1,45 @@
-"""This macros calculates the strong phases in a given binning scenario for a toy sample
-generated according to the Belle model for D0 -> Kspipi.
+"""Compare the Belle model amplitude with the cached Belle amplitude, and compute the
+strong phases c_b, s_b in the bin-flip binning for a D0 -> KS pi pi toy sample.
 """
 
-import os, time, uproot
-# import NumPy
+import argparse
+import functools
+
 import numpy as np
-# Import Tensorflow
-import tensorflow as tf
-# Import AmpliTF modules
-import amplitf.interface as atfi
-import amplitf.kinematics as atfk
-import amplitf.dynamics as atfd
-import amplitf.likelihood as atfl
-import amplitf.mixing as atfm
-from amplitf.phasespace.dalitz_phasespace import DalitzPhaseSpace
-from amplitf.phasespace.decaytime_phasespace import DecayTimePhaseSpace
-from amplitf.phasespace.combined_phasespace import CombinedPhaseSpace
-#from amplitf.mixing import psip, psim, psii, mixing_density
-
-# Import TFA modules
-import tfa.toymc as tft
-import tfa.plotting as tfp
-import tfa.optimisation as tfo
-
-# Masses of final state particles
-from particle.particle import literals as lp
-
-# Import plotting module
+import uproot
 import matplotlib.pyplot as plt
+
+import amplitf.interface as atfi
 
 from tfaex import paths
 from tfaex.io import add_binflip_binid, load_belle_model
 from tfaex.models import belle2018
+from tfaex.models.d02kspipi import dalitz_phase_space
 
-# Import argparse for command line arguments
-import argparse
-# Set up command line argument parsing
-parser = argparse.ArgumentParser(description="Calculate strong phases for D0 -> Kspipi")
-parser.add_argument("--input", type=str, default=None, help="File name for the sample to calculate strong phases for", required=True)
-#parser.add_argument("--binning", type=str, default=None, help="Binning scheme to use for the calculation of strong phases")
-#parser.add_argument("--output", type=str, default='cb_', help="Output file name for the strong phases results")
-parser.add_argument("--dryrun", action="store_true", help="Run without executing the main function")
-args = parser.parse_args()
+phsp = dalitz_phase_space()
 
-# define some global variables 
-mkz = atfi.const(lp.K_S_0.mass/1000)
-mpi = atfi.const(lp.pi_plus.mass/1000)
-md = atfi.const(lp.D_0.mass/1000)
-meta = atfi.const(lp.eta.mass/1000.)
-metap = atfi.const(lp.etap_958.mass/1000.)
-belle_model = load_belle_model()
 
-#Define the phase space for the decay D0 -> Kspipi.
-# Create Dalitz Phase Space
-phsp = DalitzPhaseSpace(mpi, mkz, mpi, md)
+def parse_args(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--input", type=str, default=None,
+                        help="Toy sample (.npy) for the strong phase calculation")
+    parser.add_argument("--dryrun", action="store_true", help="Parse the arguments and exit")
+    return parser.parse_args(argv)
+
+
+@functools.cache
+def _belle_model():
+    return load_belle_model()
+
 
 def Af(x, switches=belle2018.DEFAULT_SWITCHES):
-    return belle2018.amplitude(x, phsp, belle_model, switches)
+    return belle2018.amplitude(x, phsp, _belle_model(), switches)
+
 
 def Afbar(x):
-    # the conjugate of the amplitude
-    # is the same as the amplitude with the masses swapped
-    return Af(x[:,::-1])
+    # the D0bar amplitude is the D0 one with m2(KS pi+) <-> m2(KS pi-)
+    return Af(x[:, ::-1])
+
 
 def get_model_cache(model, xbins, ybins):
     # Create a grid of points at the center of each bin
@@ -288,8 +266,8 @@ def calculate_strong_phases(x):
     return delta_strong_original_order
 
 
-def load_data():
-    data = np.load(args.input)
+def load_data(file_name):
+    data = np.load(file_name)
     data = add_binflip_binid(data)
     return data
 
@@ -302,7 +280,11 @@ def get_uniform_phase_space_sample(n_events):
     return data
 
 
-def main():
+def main(argv=None):
+    args = parse_args(argv)
+    if args.dryrun:
+        print(args)
+        return
 
     # Compare the strong phases calculated from the cache with those calculated from the model
     belle_cache = get_belle_cache()
@@ -317,7 +299,7 @@ def main():
         axs.append(ax)
     plt.show()
 
-    # data = load_data()
+    # data = load_data(args.input)
     
     # # Calculate strong phase differences
     # print(f"Calculating strong phases for {len(data)} events...")
@@ -339,10 +321,4 @@ def main():
     return 
 
 if __name__ == "__main__":
-    if not args.dryrun:
-        main()
-
-
-### TODO:
-# Add a function to apply reconstruction efficiencies to the toy MC sample
-# Add a function to generate generator-level data on-demand
+    main()

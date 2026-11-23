@@ -13,8 +13,22 @@ import amplitf.kinematics as atfk
 import amplitf.dynamics as atfd
 import amplitf.mixing as atfm
 
+from amplitf.phasespace.dalitz_phasespace import DalitzPhaseSpace
+from particle.particle import literals as lp
+
 from tfaex import paths
 from tfaex.models.couplings import coherent_sum, couplings_from_params
+
+
+def dalitz_phase_space():
+    """Dalitz phase space of D0 -> pi+ KS pi- (a = pi+, b = KS, c = pi-), masses in GeV.
+
+    ``m2ab`` is m2(KS pi+) and ``m2bc`` is m2(KS pi-).
+    """
+    mpi = atfi.const(lp.pi_plus.mass / 1000.0)
+    mkz = atfi.const(lp.K_S_0.mass / 1000.0)
+    md = atfi.const(lp.D_0.mass / 1000.0)
+    return DalitzPhaseSpace(mpi, mkz, mpi, md)
 
 
 def simple(x, phsp,

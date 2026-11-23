@@ -1,17 +1,22 @@
-import os
-import numpy as np
+"""Bin-flip ratios R_b(t) = N(+b) / N(-b) versus decay time for a D0 -> KS pi pi toy sample."""
+
 import argparse
+
+import numpy as np
 import matplotlib.pyplot as plt
 
 from tfaex import paths
 from tfaex.io import add_binflip_binid
 
-parser = argparse.ArgumentParser(description="Run bin flip fitter for D0 -> Kspipi")
-parser.add_argument("--nevs", type=int, default=-1, help="Number of events to process")
-parser.add_argument("--nbins", type=int, default=10, help="Number of decay time bins")
-parser.add_argument("--input", type=str, default=None, help="Toy sample (.npy); defaults to <output dir>/d02kspipi_toy.npy")
-parser.add_argument("--dryrun", action="store_true", help="Run without executing the main function")
-args = parser.parse_args()
+
+def parse_args(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--input", type=str, default=None,
+                        help="Toy sample (.npy); defaults to <output dir>/d02kspipi_toy.npy")
+    parser.add_argument("--nevs", type=int, default=-1, help="Number of events to process")
+    parser.add_argument("--nbins", type=int, default=10, help="Number of decay time bins")
+    parser.add_argument("--dryrun", action="store_true", help="Parse the arguments and exit")
+    return parser.parse_args(argv)
 
 
 def order_dataset(data):
@@ -19,9 +24,9 @@ def order_dataset(data):
     return data[data[:, 2].argsort()]
 
 
-def calculate_ratios(data):
+def calculate_ratios(data, nbins):
     # Split the data into decay time bins
-    data_dt = np.array_split(data, args.nbins)
+    data_dt = np.array_split(data, nbins)
     Np = [[ len(data_dt_sam[data_dt_sam[:,3]==binid]) for data_dt_sam in data_dt ] for binid in range(1,9)]
     Nm = [[ len(data_dt_sam[data_dt_sam[:,3]==-binid]) for data_dt_sam in data_dt ] for binid in range(1,9)]
     rat = np.divide(Np, Nm, out=np.zeros_like(Np, dtype=float), where=Nm!=0)
@@ -31,16 +36,16 @@ def calculate_ratios(data):
     return rat, rat_unc
 
 
-def calculate_decay_time_centers(data):
+def calculate_decay_time_centers(data, nbins):
     # Calculate the centers of the decay time bins
-    data_dt = np.array_split(data, args.nbins)
+    data_dt = np.array_split(data, nbins)
     dt_centers = [np.mean(data_dt_bin[:,2] ) for data_dt_bin in data_dt]
     return dt_centers
 
 
-def plot_ratios(data):
-    ratios = calculate_ratios(data)
-    dt_centers = calculate_decay_time_centers(data)
+def plot_ratios(data, nbins):
+    ratios = calculate_ratios(data, nbins)
+    dt_centers = calculate_decay_time_centers(data, nbins)
     fig, ax = plt.subplots(4,2, figsize=(10, 8), sharex=True)
     for i in range(8):
         ax[i//2, i%2].errorbar(dt_centers, ratios[0][i], yerr=ratios[1][i], fmt='o', label=f'Bin {i+1}')
@@ -75,19 +80,19 @@ def plot_data(data):
     return fig, ax
 
 
-def main():
-    data = np.load(args.input or paths.output_dir(create=False) / 'd02kspipi_toy.npy')
-    if args.nevs > 0 and args.nevs < len(data):
-        data = data[:args.nevs]
+def main(argv=None):
+    args = parse_args(argv)
+    if args.dryrun:
+        print(args)
+        return
+    data = np.load(args.input or paths.output_dir(create=False) / "d02kspipi_toy.npy")
+    if 0 < args.nevs < len(data):
+        data = data[: args.nevs]
     data = order_dataset(data)
     data = add_binflip_binid(data)
-    fig, ax = plot_ratios(data)
+    plot_ratios(data, args.nbins)
     plt.show()
-    return
 
 
 if __name__ == "__main__":
-    if not args.dryrun:
-        main()
-    else:
-        print("Dry run mode: main function will not be executed.")
+    main()

@@ -65,10 +65,11 @@ and couplings are passed as a dict, or as real fit parameters
 ```python
 from tfaex.models import belle2018
 from tfaex.models.couplings import fit_parameters, switches_for
+from tfaex.models.d02kspipi import BABAR2008_COMPONENTS
 
 model = belle2018.amplitude_model(x, phsp, belle_model)
 amp = model(couplings=belle2018.couplings(belle_model))
-amp_kst = model(couplings=..., switches=switches_for(BABAR2008_COMPONENTS, ["Kstar892minus"]))
+amp_kst = model(couplings=belle2018.couplings(belle_model), switches=switches_for(BABAR2008_COMPONENTS, ["Kstar892minus"]))
 pars = fit_parameters({"Kstar892minus": -1.2 + 1.1j})   # Kstar892minus_re, Kstar892minus_im
 ```
 
