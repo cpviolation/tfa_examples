@@ -79,7 +79,8 @@ def mixing_model(x):
     #ampl_dzb = Afbar(c_phsp.data1(x))
     #
     ampl_dz = belle_cache_model(c_phsp.data1(x))
-    ampl_dzb = belle_cache_model(c_phsp.data1(x[:,::-1]))
+    # swap m2(KS pi+) <-> m2(KS pi-) only; reversing x would also move the decay time column
+    ampl_dzb = belle_cache_model(c_phsp.data1(x)[:, ::-1])
     # Calculate the model from the mixing parameters and time evolution operators
     def _model(x_mix_par, y_mix_par, qoverp_re, qoverp_im):
         t = c_phsp.phsp2.t(c_phsp.data2(x))
