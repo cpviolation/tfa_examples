@@ -47,17 +47,23 @@ def parse_args(argv=None):
     return parser.parse_args(argv)
 
 
-def mixing_model(x):
-    """Time-dependent density; returns a function of the mixing parameters."""
+def mixing_model(x, relative_to_decay=True):
+    """Time-dependent density; returns a function of the mixing parameters.
+
+    Decay times from DecayTimePhaseSpace are drawn from exp(-t/tau), so for toy
+    generation (and normalisation integrals) the density relative to that
+    exponential is used (relative_to_decay=True). Set it to False for the
+    full time-dependent density.
+    """
     ampl_dz = belle_cache_amp(c_phsp.data1(x), phsp)
     # D0bar: swap m2(KS pi+) <-> m2(KS pi-) only (not the decay time column)
     ampl_dzb = belle_cache_amp(c_phsp.data1(x)[:, ::-1], phsp)
     t = c_phsp.phsp2.t(c_phsp.data2(x))
 
     def _model(x_mix_par, y_mix_par, qoverp_re, qoverp_im):
-        tep = atfm.psip(t, y_mix_par, atfi.const(1.0))
-        tem = atfm.psim(t, y_mix_par, atfi.const(1.0))
-        tei = atfm.psii(t, x_mix_par, atfi.const(1.0))
+        tep = atfm.psip(t, y_mix_par, atfi.const(1.0), relative_to_decay)
+        tem = atfm.psim(t, y_mix_par, atfi.const(1.0), relative_to_decay)
+        tei = atfm.psii(t, x_mix_par, atfi.const(1.0), relative_to_decay)
         return atfm.mixing_density(
             ampl_dz, ampl_dzb, atfi.complex(qoverp_re, qoverp_im), tep, tem, tei
         )

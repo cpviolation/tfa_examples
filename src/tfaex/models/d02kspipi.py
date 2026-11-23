@@ -97,7 +97,7 @@ def simple_model_mix(x, tphsp, tdz,
            md, mpi, mkz, 
            mkst, wkst,
            mrho, wrho,
-           rd, rr):
+           rd, rr, relative_to_decay=True):
     """A simple model in which amplitudes parameters are fixed
 
     Args:
@@ -113,9 +113,12 @@ def simple_model_mix(x, tphsp, tdz,
         wrho (tf.constant): width of the rho(770) resonance
         rd (tf.constant): Blatt-Weisskopf radius for Breit-Wigner lineshape (D0)
         rr (tf.constant): Blatt-Weisskopf radius for Breit-Wigner lineshape (resonance)
+        relative_to_decay (bool): if True (default), the density is divided by
+            exp(-t/tdz), as needed for toys and normalisation integrals with
+            samples from DecayTimePhaseSpace (exponential in t)
 
     Returns:
-        tf.tensor: the value(s) of the amplitude
+        tf.tensor: the value(s) of the density
     """
 
     # DZ - MIXING MODEL
@@ -137,9 +140,9 @@ def simple_model_mix(x, tphsp, tdz,
                x_mix_par, y_mix_par, qop_mag, qop_pha, 
                switches=4 * [1]):
 
-        tep = atfm.psip(tphsp.phsp2.t(tphsp.data2(x)), y_mix_par, tdz)
-        tem = atfm.psim(tphsp.phsp2.t(tphsp.data2(x)), y_mix_par, tdz)
-        tei = atfm.psii(tphsp.phsp2.t(tphsp.data2(x)), x_mix_par, tdz)
+        tep = atfm.psip(tphsp.phsp2.t(tphsp.data2(x)), y_mix_par, tdz, relative_to_decay)
+        tem = atfm.psim(tphsp.phsp2.t(tphsp.data2(x)), y_mix_par, tdz, relative_to_decay)
+        tei = atfm.psii(tphsp.phsp2.t(tphsp.data2(x)), x_mix_par, tdz, relative_to_decay)
         qoverp = atfi.complex(qop_mag * atfi.cos(qop_pha), 
                               qop_mag * atfi.sin(qop_pha))
 
