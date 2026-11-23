@@ -165,3 +165,30 @@ def plot_data_comparison_mix(data, c_phsp):
     plt.tight_layout(pad=1.0, w_pad=1.0, h_pad=1.0)
 
     return fig, ax
+
+def plot_reference_comparison(x, cpp, tf, xlabel, title=None):
+    """Compare a TF amplitude with C++ reference values at the same points.
+
+    Panels: |A|^2, arg(A) and |A_TF - A_C++| / |A_C++| as a function of ``x``.
+    """
+    import numpy as np
+
+    order = np.argsort(x)
+    x, cpp, tf = x[order], cpp[order], tf[order]
+    fig, ax = plt.subplots(1, 3, figsize=(13, 4))
+    ax[0].plot(x, np.abs(cpp) ** 2, ".", ms=4, label="C++")
+    ax[0].plot(x, np.abs(tf) ** 2, ".", ms=1.5, label="TF")
+    ax[0].set_ylabel(r"$|A|^2$")
+    ax[0].legend()
+    ax[1].plot(x, np.angle(cpp), ".", ms=4, label="C++")
+    ax[1].plot(x, np.angle(tf), ".", ms=1.5, label="TF")
+    ax[1].set_ylabel(r"$\arg A$")
+    with np.errstate(divide="ignore", invalid="ignore"):
+        ax[2].semilogy(x, np.abs(tf - cpp) / np.abs(cpp), ".", ms=2)
+    ax[2].set_ylabel(r"$|A_{TF} - A_{C++}| / |A_{C++}|$")
+    for a in ax:
+        a.set_xlabel(xlabel)
+    if title:
+        fig.suptitle(title)
+    fig.tight_layout()
+    return fig, ax
