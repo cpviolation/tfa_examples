@@ -321,8 +321,12 @@ def babar2008_components(x, phsp,
                     mrho1450, wrho1450,
                     lass_a, lass_r, lass_M, lass_G, lass_R, lass_phiR, lass_F, lass_phiF,
                     m_poles, g_poles, s0, fij, b_poles, K_matrix_sprod, fprod1,
-                    km_masses):
+                    km_masses, kmatrix_multimeson="belle"):
     """Amplitude components of the BaBar 2008 model, keyed by :data:`BABAR2008_COMPONENTS`.
+
+    ``kmatrix_multimeson`` selects the 4pi phase-space approximation below 1 GeV^2
+    in the K-matrix (see ``amplitf.dynamics.kmatrix_phsp_multimeson``); the
+    default ``"belle"`` is the one of the BaBar/Belle implementation.
 
     Each value is the complex lineshape times the angular term, without coupling.
     """
@@ -369,7 +373,7 @@ def babar2008_components(x, phsp,
     # K matrix
     km = atfd.kmatrix_lineshape(
         m2ac, m_poles, g_poles, s0, fij, b_poles, K_matrix_sprod, fprod1,
-        km_masses)
+        km_masses, multimeson=kmatrix_multimeson)
 
     one = atfi.cast_complex(atfi.ones(m2ab))
     values = [

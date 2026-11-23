@@ -14,7 +14,8 @@ from amplitf.phasespace.dalitz_phasespace import DalitzPhaseSpace
 from tfaex import paths
 from tfaex.io import load_belle_model
 from tfaex.models import belle2018
-from tfaex.models.d02kspipi import babar2008_components
+from tfaex.models.couplings import coherent_sum
+from tfaex.models.d02kspipi import BABAR2008_FIXED, babar2008_components
 
 
 def load_cpp_reference(file_name=paths.CPP_REFERENCE):
@@ -32,17 +33,21 @@ def cpp_phase_space(ref):
     return DalitzPhaseSpace(mpi, mkz, mpi, md)
 
 
-def tf_components(ref, belle_model=None):
+def tf_components(ref, belle_model=None, kmatrix_masses=None, kmatrix_multimeson=None):
     """TF terms of the coherent sum (coupling x component) at the reference points.
 
     Returns {name: complex numpy array}, with the same keys as the C++ terms plus
-    ``total`` (the Belle 2018 amplitude with default switches).
+    ``total`` (the Belle 2018 amplitude with default switches). ``kmatrix_masses``
+    is passed to :func:`tfaex.models.belle2018.lineshape_args`; use
+    ``belle2018.CPP_KMATRIX_MASSES`` to reproduce the C++ code exactly.
+    ``kmatrix_multimeson`` defaults to ``belle2018.KMATRIX_MULTIMESON``.
     """
     belle_model = belle_model or load_belle_model()
     phsp = cpp_phase_space(ref)
     x = atfi.const(np.stack([ref["m2_kspim"], ref["m2_kspip"]], axis=1))
-    comps = babar2008_components(x, phsp, *belle2018.lineshape_args(belle_model))
+    comps = babar2008_components(x, phsp, *belle2018.lineshape_args(belle_model, kmatrix_masses),
+                                 kmatrix_multimeson=kmatrix_multimeson or belle2018.KMATRIX_MULTIMESON)
     cpl = belle2018.couplings(belle_model)
     out = {k: (cpl[k] * v if k in cpl else v).numpy() for k, v in comps.items()}
-    out["total"] = belle2018.amplitude(x, phsp, belle_model).numpy()
+    out["total"] = coherent_sum(comps, cpl, belle2018.DEFAULT_SWITCHES, fixed=BABAR2008_FIXED).numpy()
     return out
