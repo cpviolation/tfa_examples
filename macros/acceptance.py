@@ -7,6 +7,8 @@ import tensorflow as tf
 import tensorflow_probability as tfp
 from scipy.integrate import simpson
 from scipy.stats import gengamma
+
+from tfaex.acceptance import decay_time_efficiency
 tfd = tfp.distributions
 
 @tf.function
@@ -70,7 +72,7 @@ def fit_gengamma_to_acceptance():
     # Step 4: Fit a generalized gamma to the samples
     shape_a, shape_c, loc, scale = gengamma.fit(samples_from_pdf, floc=0)
 
-    print(f"Fitted generalized gamma parameters:")
+    print("Fitted generalized gamma parameters:")
     print(f"  shape c:     {shape_c}")
     print(f"  shape a:     {shape_a}")
     print(f"  loc:         {loc}")
@@ -96,8 +98,8 @@ def fit_gengamma_to_acceptance():
 
 
 def dt_acceptance(t, t0, a, b, beta, m, n):
-    dt = t-t0
-    return np.where( dt>=0, (dt**a / (b + dt**n))**m * np.exp(-beta * dt), 0)
+    """Efficiency (tfaex.acceptance.decay_time_efficiency) times exp(-beta (t - t0))."""
+    return decay_time_efficiency(t, t0, a, b, m, n) * np.where(t > t0, np.exp(-beta * (t - t0)), 0.0)
 
 def plot_dt_acceptance():
 

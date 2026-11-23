@@ -2,7 +2,11 @@
 
 The D0 and D0bar amplitudes are read from the binned Belle model in
 inputs/belle_cache.root. The sample is saved as a numpy array with columns
-(m2(KS pi+), m2(KS pi-), t/tau) in $TFAEX_OUTPUT or <repo>/output.
+(m2(KS pi-), m2(KS pi+), t/tau) in $TFAEX_OUTPUT or <repo>/output.
+
+With --acceptance T0 A B M N, a decay-time efficiency
+((t-t0)^a / (b + (t-t0)^n))^m (tfaex.acceptance) is applied by accept-reject,
+so fewer than --ntoys events are kept.
 """
 
 import argparse
@@ -17,6 +21,7 @@ from amplitf.phasespace.combined_phasespace import CombinedPhaseSpace
 from amplitf.phasespace.decaytime_phasespace import DecayTimePhaseSpace
 
 from tfaex import paths
+from tfaex.acceptance import apply_efficiency, decay_time_efficiency
 from tfaex.models.d02kspipi import belle_cache_amp, dalitz_phase_space
 
 # Decay time in units of the D0 lifetime
@@ -33,6 +38,9 @@ def parse_args(argv=None):
     parser.add_argument("-y", type=float, default=0.0064, help="Mixing parameter y")
     parser.add_argument("-qop", type=float, default=1.0, help="|q/p|")
     parser.add_argument("-qop_phase", type=float, default=0.0, help="arg(q/p)")
+    parser.add_argument("--acceptance", type=float, nargs=5, default=None,
+                        metavar=("T0", "A", "B", "M", "N"),
+                        help="Apply the decay-time efficiency with these parameters (t in units of tau)")
     parser.add_argument("--output", type=str, default="d02kspipi_toy",
                         help="Output file name, without extension")
     parser.add_argument("--dryrun", action="store_true", help="Parse the arguments and exit")
@@ -81,6 +89,12 @@ def generate(ntoys, x_mix, y_mix, qop, qop_phase, seed=None):
     return sample.numpy()
 
 
+def apply_acceptance(sample, t0, a, b, m, n, seed=None):
+    """Keep events with probability proportional to the decay-time efficiency."""
+    eff = decay_time_efficiency(sample[:, 2], t0, a, b, m, n)
+    return apply_efficiency(sample, eff, rng=seed)
+
+
 def main(argv=None):
     args = parse_args(argv)
     if args.dryrun:
@@ -89,6 +103,9 @@ def main(argv=None):
     start_time = time.time()
     sample = generate(args.ntoys, args.x, args.y, args.qop, args.qop_phase, seed=args.seed)
     print(f"Generated {args.ntoys} events in {time.time() - start_time:.2f} seconds.")
+    if args.acceptance is not None:
+        sample = apply_acceptance(sample, *args.acceptance, seed=args.seed)
+        print(f"Kept {len(sample)} events after the decay-time acceptance.")
     file_name = paths.output_dir() / (args.output + ".npy")
     np.save(file_name, sample)
     print(f"Saved toy sample to {file_name}")

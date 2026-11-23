@@ -41,4 +41,8 @@ def test_toys_and_binflip():
     data = binflip.add_binflip_binid(binflip.order_dataset(sample))
     ratios, errors = binflip.calculate_ratios(data, nbins=5)
     assert ratios.shape == (8, 5)
+
+    accepted = toys.apply_acceptance(sample, 0.3, 1.5, 2.0, 1.0, 1.0, seed=2)
+    assert 0 < len(accepted) < len(sample)
+    assert np.all(accepted[:, 2] > 0.3)
     assert np.all(np.isfinite(errors))
