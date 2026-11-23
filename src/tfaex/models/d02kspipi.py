@@ -21,9 +21,10 @@ from tfaex.models.couplings import coherent_sum, couplings_from_params
 
 
 def dalitz_phase_space():
-    """Dalitz phase space of D0 -> pi+ KS pi- (a = pi+, b = KS, c = pi-), masses in GeV.
+    """Dalitz phase space of D0 -> KS pi+ pi- (a = pi-, b = KS, c = pi+), masses in GeV.
 
-    ``m2ab`` is m2(KS pi+) and ``m2bc`` is m2(KS pi-).
+    ``m2ab`` is m2(KS pi-) and ``m2bc`` is m2(KS pi+): the Cabibbo-favoured
+    K*(892)- of the BaBar/Belle models is on ``m2ab``.
     """
     mpi = atfi.const(lp.pi_plus.mass / 1000.0)
     mkz = atfi.const(lp.K_S_0.mass / 1000.0)
@@ -335,9 +336,13 @@ def babar2008_components(x, phsp,
     mac = atfi.sqrt(m2ac)
 
     # zemach tensors
-    hel_ab_1 = atfi.cast_complex(helicity_babar2008(mab,mbc,mac,phsp.ma,phsp.mb,phsp.mc,phsp.md,1))
-    hel_bc_1 = atfi.cast_complex(helicity_babar2008(mbc,mab,mac,phsp.mc,phsp.mb,phsp.ma,phsp.md,1))
-    hel_ac_1 = atfi.cast_complex(helicity_babar2008(mac,mbc,mab,phsp.ma,phsp.mc,phsp.mb,phsp.md,1))
+    # Spin-1 terms are odd under exchange of the two resonance daughters. The sign
+    # follows the orientation of the Belle/BaBar C++ code (Resonance.cpp in
+    # d02kspipi_toys) in which the Belle couplings were fitted; it is opposite to
+    # helicity_babar2008 with the argument order used for the spin-2 terms below.
+    hel_ab_1 = -atfi.cast_complex(helicity_babar2008(mab,mbc,mac,phsp.ma,phsp.mb,phsp.mc,phsp.md,1))
+    hel_bc_1 = -atfi.cast_complex(helicity_babar2008(mbc,mab,mac,phsp.mc,phsp.mb,phsp.ma,phsp.md,1))
+    hel_ac_1 = -atfi.cast_complex(helicity_babar2008(mac,mbc,mab,phsp.ma,phsp.mc,phsp.mb,phsp.md,1))
     hel_ab_2 = atfi.cast_complex(helicity_babar2008(mab,mbc,mac,phsp.ma,phsp.mb,phsp.mc,phsp.md,2))
     hel_bc_2 = atfi.cast_complex(helicity_babar2008(mbc,mab,mac,phsp.mc,phsp.mb,phsp.ma,phsp.md,2))
     hel_ac_2 = atfi.cast_complex(helicity_babar2008(mac,mbc,mab,phsp.ma,phsp.mc,phsp.mb,phsp.md,2))

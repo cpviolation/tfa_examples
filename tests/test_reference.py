@@ -5,7 +5,6 @@ C++ code in d02kspipi_toys on a 500x500 grid in (m2(KS pi+), m2(KS pi-)).
 """
 
 import numpy as np
-import pytest
 import uproot
 
 import amplitf.interface as atfi
@@ -16,12 +15,6 @@ from tfaex.models import belle2018
 from tfaex.models.d02kspipi import dalitz_phase_space
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="belle2018.amplitude differs from the C++ cache by O(100%) after removing a "
-    "global complex factor, for every axis/conjugation convention tried; under study "
-    "in macros/strong_phases.py",
-)
 def test_belle2018_matches_cpp_cache():
     with uproot.open(paths.BELLE_CACHE) as f:
         amp, xbins, ybins = f["histo_amplitude"].to_numpy()
@@ -38,5 +31,9 @@ def test_belle2018_matches_cpp_cache():
     tf_amp = belle2018.amplitude(atfi.const(points[inside]), phsp, load_belle_model()).numpy()
 
     ratio = tf_amp / ref[inside]
-    ratio /= np.median(ratio)  # conventions may differ by a global complex factor
-    assert np.median(np.abs(ratio - 1)) < 0.01
+    # The cache x axis is m2(KS pi-): make_amplitude_hists.cpp fills it with
+    # calc_amp(x, y), whose first argument is m2(KS pi-). The residual differences
+    # come from the K-matrix multi-meson phase space below 1 GeV^2 (see
+    # test_cpp_reference.py) and from the PDG masses used on the TF side.
+    assert np.median(np.abs(ratio - 1)) < 5e-3
+    assert abs(np.median(ratio.real) - 1) < 5e-3 and abs(np.median(ratio.imag)) < 5e-3

@@ -24,7 +24,8 @@ REFERENCE = "rho770"
 
 def lineshape_args(belle_model):
     """Positional arguments of :func:`babar2008_components` after ``(x, phsp)``."""
-    mkz = atfi.const(lp.K_S_0.mass / 1000.0)
+    # the KKbar channel of the K-matrix uses the charged kaon mass, as in the Belle code
+    mk = atfi.const(lp.K_plus.mass / 1000.0)
     mpi = atfi.const(lp.pi_plus.mass / 1000.0)
     meta = atfi.const(lp.eta.mass / 1000.0)
     metap = atfi.const(lp.etap_958.mass / 1000.0)
@@ -52,7 +53,7 @@ def lineshape_args(belle_model):
         p("rho1450_Mass"), p("rho1450_Width"),
         # LASS
         p("LASS_a"), p("LASS_r"),
-        atfi.const(1.4617), atfi.const(0.2683),
+        p("Kstarzero1430_Mass"), p("Kstarzero1430_Width"),
         p("LASS_R"), p("LASS_phi_R"),
         p("LASS_F"), p("LASS_phi_F"),
         # K-matrix
@@ -71,7 +72,7 @@ def lineshape_args(belle_model):
         cplx("Kmatrix_beta"),
         atfi.const(-0.07),
         cplx("Kmatrix_f_prod_1"),
-        [[mpi, mpi], [mkz, mkz], [mpi], [meta, meta], [meta, metap]],
+        [[mpi, mpi], [mk, mk], [mpi], [meta, meta], [meta, metap]],
     ]
 
 
