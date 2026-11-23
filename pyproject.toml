@@ -24,7 +24,7 @@ metal = ["tensorflow-metal; sys_platform == 'darwin'"]
 cuda = ["tensorflow[and-cuda]; sys_platform == 'linux'"]
 
 [dependency-groups]
-dev = ["pytest", "jupyter"]
+dev = ["pytest", "jupyter", "pre-commit", "nbstripout"]
 
 # AmpliTF and TFA2 are git submodules (cpviolation forks): installed in editable
 # mode so that local changes to the core libraries are picked up immediately.
