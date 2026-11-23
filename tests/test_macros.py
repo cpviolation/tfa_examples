@@ -16,7 +16,9 @@ def load(name):
     return module
 
 
-@pytest.mark.parametrize("name", ["d02kspipi_toys", "binflipfitter", "strong_phases", "acceptance"])
+@pytest.mark.parametrize(
+    "name", ["d02kspipi_toys", "binflipfitter", "strong_phases", "acceptance", "make_cpp_reference"]
+)
 def test_import(name):
     load(name)
 

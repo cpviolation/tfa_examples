@@ -1,4 +1,4 @@
-"""Cross-checks of the TF models against reference values from the C++ generator.
+"""Cross-check of the TF Belle model against the cached C++ amplitude used by the toys.
 
 inputs/belle_cache.root holds the Belle D0 -> KS pi pi amplitude computed by the
 C++ code in d02kspipi_toys on a 500x500 grid in (m2(KS pi+), m2(KS pi-)).

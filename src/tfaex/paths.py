@@ -19,6 +19,7 @@ INPUTS_DIR = REPO_ROOT / "inputs"
 BELLE_MODEL = PARAMS_DIR / "belle_model.txt"
 BELLE_MODEL_DEFINITIONS = INPUTS_DIR / "belle_model_definitions.txt"
 BELLE_CACHE = INPUTS_DIR / "belle_cache.root"
+CPP_REFERENCE = INPUTS_DIR / "d02kspipi_cpp_reference.npz"
 BINFLIP_LUT = INPUTS_DIR / "BinningLUT_K0Spipi_BABAR2008_EqualDeltadeltaD.root"
 BINFLIP_LUT_HISTO = "h_BinningLUT_K0Spipi_BABAR2008_EqualDeltadeltaD"
 

@@ -17,7 +17,7 @@ src/tfaex/         installable package with the models and helpers
 macros/            command-line scripts (toys, fits, studies)
 notebooks/         exploratory notebooks
 params/            model parameters
-inputs/            cached model, parameter definitions, binning look-up tables
+inputs/            cached model, C++ reference values, parameter definitions, binning LUT
 tests/             pytest suite
 ```
 
@@ -81,6 +81,20 @@ positional `babar2008_model_amp(...)(a1r, a1i, ...)` interface still works.
 Macros write to `output/` (git-ignored); set `TFAEX_OUTPUT` to use another
 directory. Some notebooks still read `TFAEX_ROOT`: run `source setup.sh`
 before starting Jupyter for those.
+
+## Reference values from the C++ code
+
+`inputs/d02kspipi_cpp_reference.npz` holds the Belle amplitude and each of its
+terms from the C++ implementation in
+[d02kspipi_toys](https://gitlab.cern.ch/mamartin/d02kspipi_toys)
+(`Resonance.cpp`, `d02kspipi_amplitudes.cpp`) at 2000 Dalitz points.
+`tests/test_cpp_reference.py` compares the TF model with it term by term, and
+`tfaex.reference` gives the same comparison for notebooks. To regenerate it you
+need ROOT with PyROOT (e.g. Homebrew `root`) and a d02kspipi_toys checkout:
+
+```bash
+/opt/homebrew/bin/python3 macros/make_cpp_reference.py ../d02kspipi_toys
+```
 
 ## Working on AmpliTF / TFA2
 
