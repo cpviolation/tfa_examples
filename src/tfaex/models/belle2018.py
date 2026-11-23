@@ -22,13 +22,31 @@ FREE_COMPONENTS = tuple(c for c in BABAR2008_COMPONENTS if c not in BABAR2008_FI
 REFERENCE = "rho770"
 
 
-def lineshape_args(belle_model):
-    """Positional arguments of :func:`babar2008_components` after ``(x, phsp)``."""
-    # the KKbar channel of the K-matrix uses the charged kaon mass, as in the Belle code
-    mk = atfi.const(lp.K_plus.mass / 1000.0)
-    mpi = atfi.const(lp.pi_plus.mass / 1000.0)
-    meta = atfi.const(lp.eta.mass / 1000.0)
-    metap = atfi.const(lp.etap_958.mass / 1000.0)
+#: 4pi phase-space approximation used in the Belle K-matrix (amplitf.dynamics.kmatrix_phsp_multimeson)
+KMATRIX_MULTIMESON = "belle"
+
+#: K-matrix channel masses (pi, K+, eta, eta') hard-coded in the Belle C++ code
+#: (Resonance::amplitude_KMatrix); by default the PDG values are used instead.
+CPP_KMATRIX_MASSES = (0.13957, 0.493677, 0.54775, 0.95778)
+
+
+def lineshape_args(belle_model, kmatrix_masses=None):
+    """Positional arguments of :func:`babar2008_components` after ``(x, phsp)``.
+
+    Args:
+        belle_model (dict): parameters from :func:`tfaex.io.load_belle_model`.
+        kmatrix_masses (tuple, optional): (m_pi, m_K, m_eta, m_eta') in GeV for the
+            K-matrix channels, e.g. :data:`CPP_KMATRIX_MASSES`. PDG values if None.
+    """
+    if kmatrix_masses is None:
+        kmatrix_masses = (
+            lp.pi_plus.mass / 1000.0,
+            # the KKbar channel uses the charged kaon mass, as in the Belle code
+            lp.K_plus.mass / 1000.0,
+            lp.eta.mass / 1000.0,
+            lp.etap_958.mass / 1000.0,
+        )
+    mpi, mk, meta, metap = (atfi.const(m) for m in kmatrix_masses)
 
     def p(name):
         return atfi.const(belle_model[name][0])
@@ -78,7 +96,7 @@ def lineshape_args(belle_model):
 
 def amplitude_model(x, phsp, belle_model):
     """Named-coupling model (:func:`babar2008_named_model_amp`) with the Belle lineshapes."""
-    return babar2008_named_model_amp(x, phsp, *lineshape_args(belle_model))
+    return babar2008_named_model_amp(x, phsp, *lineshape_args(belle_model), kmatrix_multimeson=KMATRIX_MULTIMESON)
 
 
 def couplings(belle_model):
