@@ -14,6 +14,7 @@ import amplitf.dynamics as atfd
 import amplitf.mixing as atfm
 
 from tfaex import paths
+from tfaex.models.couplings import coherent_sum, couplings_from_params
 
 
 def simple(x, phsp,
@@ -171,6 +172,33 @@ def simple_model_mix(x, tphsp, tdz,
     return _model
 
 
+#: Components of the BaBar 2008 model. The order defines the ``switches`` and
+#: the ``a<i>`` couplings of :func:`babar2008_model_amp`.
+BABAR2008_COMPONENTS = (
+    "rho770",
+    "Kstar892minus",
+    "Kstarzero1430minus",
+    "Kstartwo1430minus",
+    "Kstar1410minus",
+    "Kstar1680minus",
+    "Kstar892plus",
+    "Kstarzero1430plus",
+    "Kstartwo1430plus",
+    "Kstar1410plus",
+    "Kstar1680plus",
+    "omega",
+    "ftwo1270",
+    "rho1450",
+    "Kmatrix",
+    "nonres",
+)
+#: Components entering with coupling 1 (K-matrix production terms are part of
+#: the lineshape; the constant term is fixed to 5).
+BABAR2008_FIXED = ("Kmatrix", "nonres")
+#: All components on except the constant term.
+BABAR2008_DEFAULT_SWITCHES = 15 * [1] + [0]
+
+
 def helicity_babar2008(mAB,mBC,mAC,mA,mB,mC,mD,spin):
     hel = atfi.where( spin==1, mAC*mAC-mBC*mBC+((mD*mD-mC*mC)*(mB*mB-mA*mA)/(mAB*mAB)),
                   atfi.where( spin==2, atfi.pow(mBC*mBC-mAC*mAC+(mD*mD-mC*mC)*(mA*mA-mB*mB)/(mAB*mAB),2)-
@@ -268,7 +296,7 @@ def babar2008_model(x, phsp, *args, **kwargs):
     return _model
 
 
-def babar2008_model_amp(x, phsp,
+def babar2008_components(x, phsp,
                     mrho, wrho, mkst, wkst,
                     mk2st1430, wk2st1430,
                     mkst1410, wkst1410,
@@ -279,6 +307,11 @@ def babar2008_model_amp(x, phsp,
                     lass_a, lass_r, lass_M, lass_G, lass_R, lass_phiR, lass_F, lass_phiF,
                     m_poles, g_poles, s0, fij, b_poles, K_matrix_sprod, fprod1,
                     km_masses):
+    """Amplitude components of the BaBar 2008 model, keyed by :data:`BABAR2008_COMPONENTS`.
+
+    Each value is the complex lineshape times the angular term, without coupling.
+    """
+
 
     m2ab = phsp.m2ab(x)
     m2bc = phsp.m2bc(x)
@@ -319,89 +352,62 @@ def babar2008_model_amp(x, phsp,
         m2ac, m_poles, g_poles, s0, fij, b_poles, K_matrix_sprod, fprod1,
         km_masses)
 
-    def _model(a1r,
-               a1i,
-               a2r,
-               a2i,
-               a3r,
-               a3i,
-               a4r,
-               a4i,
-               a5r,
-               a5i,
-               a6r,
-               a6i,
-               a7r,
-               a7i,
-               a8r,
-               a8i,
-               a9r,
-               a9i,
-               a10r,
-               a10i,
-               a11r,
-               a11i,
-               a12r,
-               a12i,
-               a13r,
-               a13i,
-               a14r,
-               a14i,
-               switches=15 * [1]+[0]):
+    one = atfi.cast_complex(atfi.ones(m2ab))
+    values = [
+        bw1 * hel_ac_1,               # rho(770)
+        bw2 * hel_ab_1,               # K*(892)-
+        lass_n,                       # K*0(1430)- (LASS)
+        bw4 * hel_ab_2,               # K*2(1430)-
+        bw5 * hel_ab_1,               # K*(1410)-
+        bw6 * hel_ab_1,               # K*(1680)-
+        bw7 * hel_bc_1,               # K*(892)+
+        lass_p,                       # K*0(1430)+ (LASS)
+        bw9 * hel_bc_2,               # K*2(1430)+
+        bw10 * hel_bc_1,              # K*(1410)+
+        bw11 * hel_bc_1,              # K*(1680)+
+        bw12 * hel_ac_1,              # omega(782)
+        bw13 * hel_ac_2,              # f2(1270)
+        bw14 * hel_ac_1,              # rho(1450)
+        km,                           # pipi S-wave (K-matrix)
+        one * atfi.complex(atfi.const(5.0), atfi.const(0.0)),  # constant term
+    ]
+    return dict(zip(BABAR2008_COMPONENTS, values))
 
-        a1 = atfi.complex(a1r, a1i)
-        a2 = atfi.complex(a2r, a2i)
-        a3 = atfi.complex(a3r, a3i)
-        a4 = atfi.complex(a4r, a4i)
-        a5 = atfi.complex(a5r, a5i)
-        a6 = atfi.complex(a6r, a6i)
-        a7 = atfi.complex(a7r, a7i)
-        a8 = atfi.complex(a8r, a8i)
-        a9 = atfi.complex(a9r, a9i)
-        a10 = atfi.complex(a10r, a10i)
-        a11 = atfi.complex(a11r, a11i)
-        a12 = atfi.complex(a12r, a12i)
-        a13 = atfi.complex(a13r, a13i)
-        a14 = atfi.complex(a14r, a14i)
 
-        ampl = atfi.cast_complex(atfi.ones(m2ab)) * atfi.complex(
-            atfi.const(0.0), atfi.const(0.0))
+def babar2008_named_model_amp(x, phsp, *args, **kwargs):
+    """BaBar 2008 amplitude with couplings passed by name.
 
-        if switches[0]:
-            ampl += a1 * bw1 * hel_ac_1
-        if switches[1]:
-            ampl += a2 * bw2 * hel_ab_1
-        if switches[2]:
-            ampl += a3 * lass_n
-        if switches[3]:
-            ampl += a4 * bw4 * hel_ab_2
-        if switches[4]:
-            ampl += a5 * bw5 * hel_ab_1
-        if switches[5]:
-            ampl += a6 * bw6 * hel_ab_1
-        if switches[6]:
-            ampl += a7 * bw7 * hel_bc_1
-        if switches[7]:
-            ampl += a8 * lass_p
-        if switches[8]:
-            ampl += a9 * bw9 * hel_bc_2
-        if switches[9]:
-            ampl += a10 * bw10 * hel_bc_1
-        if switches[10]:
-            ampl += a11 * bw11 * hel_bc_1
-        if switches[11]:
-            ampl += a12 * bw12 * hel_ac_1
-        if switches[12]:
-            ampl += a13 * bw13 * hel_ac_2
-        if switches[13]:
-            ampl += a14 * bw14 * hel_ac_1
-        if switches[14]:
-            ampl += km
-        if switches[15]:
-            ampl += atfi.cast_complex(atfi.ones(m2ab)) * atfi.complex(
-                atfi.const(5.0), atfi.const(0.0))
+    Takes the same arguments as :func:`babar2008_components`. The returned
+    function takes ``couplings`` ({name: complex}) or real parameters
+    ``<name>_re``/``<name>_im`` (as produced by
+    :func:`tfaex.models.couplings.fit_parameters`), and ``switches``.
+    """
+    components = babar2008_components(x, phsp, *args, **kwargs)
 
-        return ampl
+    def _model(couplings=None, switches=BABAR2008_DEFAULT_SWITCHES, **params):
+        if couplings is None:
+            couplings = couplings_from_params(params, BABAR2008_COMPONENTS)
+        return coherent_sum(components, couplings, switches, fixed=BABAR2008_FIXED)
+
+    return _model
+
+
+def babar2008_model_amp(x, phsp, *args, **kwargs):
+    """BaBar 2008 amplitude with couplings ``a1r, a1i, ..., a14r, a14i``.
+
+    Kept for the existing notebooks; ``a<i>`` is the coupling of the i-th entry
+    of :data:`BABAR2008_COMPONENTS`. Prefer :func:`babar2008_named_model_amp`.
+    """
+    components = babar2008_components(x, phsp, *args, **kwargs)
+    names = BABAR2008_COMPONENTS[:14]
+
+    def _model(a1r, a1i, a2r, a2i, a3r, a3i, a4r, a4i, a5r, a5i, a6r, a6i, a7r, a7i,
+               a8r, a8i, a9r, a9i, a10r, a10i, a11r, a11i, a12r, a12i, a13r, a13i,
+               a14r, a14i, switches=BABAR2008_DEFAULT_SWITCHES):
+        re = [a1r, a2r, a3r, a4r, a5r, a6r, a7r, a8r, a9r, a10r, a11r, a12r, a13r, a14r]
+        im = [a1i, a2i, a3i, a4i, a5i, a6i, a7i, a8i, a9i, a10i, a11i, a12i, a13i, a14i]
+        couplings = {n: atfi.complex(r, i) for n, r, i in zip(names, re, im)}
+        return coherent_sum(components, couplings, switches, fixed=BABAR2008_FIXED)
 
     return _model
 

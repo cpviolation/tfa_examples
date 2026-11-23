@@ -56,6 +56,26 @@ uv run python macros/binflipfitter.py
 uv run jupyter lab notebooks/
 ```
 
+### Models with named couplings
+
+Components are identified by name (`tfaex.models.d02kspipi.BABAR2008_COMPONENTS`)
+and couplings are passed as a dict, or as real fit parameters
+`<name>_re`/`<name>_im`:
+
+```python
+from tfaex.models import belle2018
+from tfaex.models.couplings import fit_parameters, switches_for
+
+model = belle2018.amplitude_model(x, phsp, belle_model)
+amp = model(couplings=belle2018.couplings(belle_model))
+amp_kst = model(couplings=..., switches=switches_for(BABAR2008_COMPONENTS, ["Kstar892minus"]))
+pars = fit_parameters({"Kstar892minus": -1.2 + 1.1j})   # Kstar892minus_re, Kstar892minus_im
+```
+
+`switches` is kept because TFA2 (`run_toymc`, `calculate_fit_fractions`) uses
+it to identify components. `tests/test_fit.py` shows a complete fit. The
+positional `babar2008_model_amp(...)(a1r, a1i, ...)` interface still works.
+
 Macros write to `output/` (git-ignored); set `TFAEX_OUTPUT` to use another
 directory. Some notebooks still read `TFAEX_ROOT`: run `source setup.sh`
 before starting Jupyter for those.

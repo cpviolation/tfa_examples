@@ -1,38 +1,29 @@
 """D0 -> KS pi+ pi- amplitude with the Belle 2018 parameters.
 
-Uses the BaBar 2008 parameterisation (:func:`babar2008_model_amp`) with the
+Uses the BaBar 2008 parameterisation (:func:`babar2008_components`) with the
 resonance parameters and couplings read from ``params/belle_model.txt``.
 """
 
 import amplitf.interface as atfi
 from particle.particle import literals as lp
 
-from tfaex.models.d02kspipi import babar2008_model_amp
+from tfaex.models.d02kspipi import (
+    BABAR2008_COMPONENTS,
+    BABAR2008_DEFAULT_SWITCHES,
+    BABAR2008_FIXED,
+    babar2008_named_model_amp,
+)
 
-#: Default component switches: all resonances and K-matrix on, constant term off.
-DEFAULT_SWITCHES = 15 * [1] + [0]
+#: Default component switches (see ``BABAR2008_COMPONENTS``): constant term off.
+DEFAULT_SWITCHES = BABAR2008_DEFAULT_SWITCHES
 
-#: Mapping of complex coupling index in ``babar2008_model_amp`` to Belle parameter prefix.
-#: Coupling 1 (rho(770)) is the reference and fixed to 1.
-_COUPLINGS = {
-    2: "Kstar892minus",
-    3: "Kstarzero1430minus",
-    4: "Kstartwo1430minus",
-    5: "Kstar1410minus",
-    6: "Kstar1680minus",
-    7: "Kstar892plus",
-    8: "Kstarzero1430plus",
-    9: "Kstartwo1430plus",
-    10: "Kstar1410plus",
-    11: "Kstar1680plus",
-    12: "omega",
-    13: "ftwo1270",
-    14: "rho1450",
-}
+#: Components with a free complex coupling; rho(770) is the reference, fixed to 1.
+FREE_COMPONENTS = tuple(c for c in BABAR2008_COMPONENTS if c not in BABAR2008_FIXED)
+REFERENCE = "rho770"
 
 
 def lineshape_args(belle_model):
-    """Positional arguments of :func:`babar2008_model_amp` after ``(x, phsp)``."""
+    """Positional arguments of :func:`babar2008_components` after ``(x, phsp)``."""
     mkz = atfi.const(lp.K_S_0.mass / 1000.0)
     mpi = atfi.const(lp.pi_plus.mass / 1000.0)
     meta = atfi.const(lp.eta.mass / 1000.0)
@@ -85,23 +76,22 @@ def lineshape_args(belle_model):
 
 
 def amplitude_model(x, phsp, belle_model):
-    """Build the BaBar 2008 amplitude with fixed Belle 2018 lineshape parameters.
-
-    Returns the inner function of :func:`babar2008_model_amp`, which takes the
-    complex couplings and the component switches.
-    """
-    return babar2008_model_amp(x, phsp, *lineshape_args(belle_model))
+    """Named-coupling model (:func:`babar2008_named_model_amp`) with the Belle lineshapes."""
+    return babar2008_named_model_amp(x, phsp, *lineshape_args(belle_model))
 
 
 def couplings(belle_model):
-    """Keyword arguments with the Belle 2018 complex couplings."""
-    kwargs = {"a1r": atfi.const(1.0), "a1i": atfi.const(0.0)}
-    for i, name in _COUPLINGS.items():
-        kwargs[f"a{i}r"] = atfi.const(belle_model[f"{name}_realpart"][0])
-        kwargs[f"a{i}i"] = atfi.const(belle_model[f"{name}_imaginarypart"][0])
-    return kwargs
+    """Belle 2018 complex couplings, {component name: complex constant}."""
+    result = {REFERENCE: atfi.complex(atfi.const(1.0), atfi.const(0.0))}
+    for name in FREE_COMPONENTS:
+        if name != REFERENCE:
+            result[name] = atfi.complex(
+                atfi.const(belle_model[f"{name}_realpart"][0]),
+                atfi.const(belle_model[f"{name}_imaginarypart"][0]),
+            )
+    return result
 
 
 def amplitude(x, phsp, belle_model, switches=DEFAULT_SWITCHES):
     """Complex D0 -> KS pi+ pi- amplitude at the points ``x``."""
-    return amplitude_model(x, phsp, belle_model)(switches=switches, **couplings(belle_model))
+    return amplitude_model(x, phsp, belle_model)(couplings=couplings(belle_model), switches=switches)
