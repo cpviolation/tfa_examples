@@ -1,0 +1,4 @@
+nEvents 2000
+Seed 12345
+Output ampgen_d02kkpipi_stage1_reference.json
+Particles D0 K+ K- pi+ pi- K*(892)0 K*(892)bar0 K*(1680)0 K*(1680)bar0 K(2)*(1430)0 K(2)*(1430)bar0 phi(1020)0 rho(770)0 omega(782)0 rho(1450)0 f(2)(1270)0 a(0)(980)0 K(1)(1400)+ K(1)(1400)bar- K(1)(1270)+ K(1)(1270)bar- a(1)(1260)+ a(1)(1260)- rhoOmega00 rhoOmega10 rhoOmega20 rhoOmega30 rhoOmega40 KPi00 KPi10 KPi40 KPi50 KPi60 KPi6bar0 KK00 KK10 PiPi00 PiPi20

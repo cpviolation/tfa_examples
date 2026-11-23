@@ -1,0 +1,64 @@
+# Stage-1 subset of AmpGen options/DtoKKpipi_v2.opt (LHCb D0 -> K+ K- pi+ pi- model,
+# JHEP 02 (2019) 126), from https://github.com/GooFit/AmpGen at commit fc651a7.
+# Kept: terms with Breit-Wigner, Gounaris-Sakurai and rho-omega lineshapes.
+# Dropped for now: a0(980) Flatte, FOCUS Kpi S-wave (KPi*), K-matrix (KK*, PiPi*),
+# K1(1270) and the spline running widths; a1(1260) uses the default BW instead of the spline.
+
+EventType D0 K+ K- pi+ pi-
+####################
+
+CouplingConstant::Coordinates polar
+
+
+a(1)(1260)-_mass     = a(1)(1260)+_mass
+a(1)(1260)-_radius   = a(1)(1260)+_radius
+a(1)(1260)-_width    = a(1)(1260)+_width
+K*(892)bar0_radius   = K*(892)0_radius
+K*(1680)bar0_radius  = K*(1680)0_radius
+
+D0_radius	        2	1.21	  0.010
+K*(892)0_radius         2	1.13	  0.030
+K*(1680)0_radius        2	1.93	  0.020
+a(1)(1260)+_mass	2	1.19505	  0.001
+a(1)(1260)+_radius	2	1.7	  0
+a(1)(1260)+_width	2	0.42201	  0.002
+
+
+D0[D]{K*(1680)0{K+,pi-},K*(892)bar0{K-,pi+}}	                0	1.20197	        0.0898679   0	-2.44153	0.0844467
+D0[D]{K*(892)0{K+,pi-},K*(892)bar0{K-,pi+}}                     0	0.693083	0.0192555   0	 2.85743	0.0272405
+D0[D]{phi(1020)0{K+,K-},rhoOmega20}	                        0	1.31178	        0.0306219   0	0.537744	0.0231892
+D0[P]{K*(1680)0{K+,pi-},K*(892)bar0{K-,pi+}}         	        0	0.73917	        0.021465    0	0.12957	        0.0307949
+D0[P]{K*(1680)bar0{K-,pi+},K*(892)0{K+,pi-}}	                0	1.00726	        0.0218157   0	-2.75553	0.0216215
+D0{K*(892)0{K+,pi-},K(2)*(1430)bar0{K-,pi+}}	                0	1.52212	        0.0885003   0	2.00628	        0.0695932
+D0[P]{K*(892)0{K+,pi-},K*(892)bar0{K-,pi+}}	                0	0.268118	0.0049507   0	1.21212	        0.0207332
+
+D0{phi(1020)0{K+,K-},f(2)(1270)0{pi+,pi-}}	                0	1.40109	        0.0948856   0	1.71591	        0.0601408
+D0[P]{phi(1020)0{K+,K-},rho(1450)0{pi+,pi-}}	                0	0.761075	0.0353222   0	1.17371	        0.0377471
+D0[P]{phi(1020)0{K+,K-},rhoOmega10}	                        0	0.160089	0.0114845   0	0.276455	0.0707528
+D0{K*(1680)0{K+,pi-},K*(892)bar0{K-,pi+}}	                0	0.822123	0.0232624   0	2.99148	        0.0292659
+D0{K*(892)0{K+,pi-},K*(892)bar0{K-,pi+}}	                0	0.278754	0.0041226   0	-0.27426	0.0155225
+D0{phi(1020)0{K+,K-},rhoOmega00}	                        2	1	        0.          2	0	        0.
+D0{K(1)(1400)+{K*(892)0{K+,pi-},pi+},K-}	                0	0.626884	0.00991611  0	1.03306	        0.0194397
+D0{K(1)(1400)bar-{K*(892)bar0{K-,pi+},pi-},K+}	                0	0.245828	0.00858637  0	0.0388105	0.0403576
+D0{a(1)(1260)+,pi-}	                                        0	0.189782	0.0110908   0	-2.82353	0.0666285
+D0{a(1)(1260)-,pi+}	                                        0	0.189772	0.0137393   0	0.176024	0.0591671
+
+
+
+
+
+
+rhoOmega00{omega(782)0{pi+,pi-}}	                        0	0.113767	0.0044422   0	1.29843	        0.0422058
+rhoOmega00{rho(770)0[GounarisSakurai]{pi+,pi-}}	                2	1	        0           2	0	        0
+rhoOmega10{omega(782)0{pi+,pi-}}	                        0	0.253139	0.05144560  0   1.32102	        0.19367
+rhoOmega10{rho(770)0[GounarisSakurai]{pi+,pi-}}	                2	1	        0           2	0	        0
+rhoOmega20{omega(782)0{pi+,pi-}}	                        0	0.16057	        0.0317164   0	1.49678	        0.169311
+rhoOmega20{rho(770)0[GounarisSakurai]{pi+,pi-}}	                2	1	        0           2	0	        0
+
+
+
+
+# Stage 1: a1(1260) with the default lineshape (no spline running width)
+a(1)(1260)+{phi(1020)0{K+,K-},pi+}                              2       1               0           2       0               0
+a(1)(1260)-{phi(1020)0{K+,K-},pi-}                              2       1               0           2       -3.14159265358979 0
+

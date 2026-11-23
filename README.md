@@ -10,12 +10,13 @@ Example amplitude models, toy studies and tests built on
 external/AmpliTF   git submodule (cpviolation fork, master)
 external/TFA2      git submodule (cpviolation fork, master)
 src/tfaex/         installable package with the models and helpers
-  models/          amplitude models (d02kspipi, belle2018)
+  models/          amplitude models (d02kspipi, belle2018, d02kkpipi)
   acceptance.py    decay-time efficiency for toys
   io.py            parameter files and binning look-up tables
   paths.py         locations of input files and of the output directory
   plotting.py      standard plots
   reference.py     comparison with the C++ reference values
+  ampgen.py        models from AmpGen options files
 macros/            command-line scripts (toys, fits, studies)
 notebooks/         exploratory notebooks
 params/            model parameters
@@ -87,6 +88,24 @@ Samples have columns m²(KSπ⁻), m²(KSπ⁺) [, t/τ] in GeV²
 Macros write to `output/` (git-ignored); set `TFAEX_OUTPUT` to use another
 directory. Some notebooks still read `TFAEX_ROOT`: run `source setup.sh`
 before starting Jupyter for those.
+
+## D0 -> K+ K- pi+ pi- with the AmpGen model
+
+`tfaex.ampgen` builds an amplitude model directly from an
+[AmpGen](https://github.com/GooFit/AmpGen) options file: decay descriptors and
+couplings, particle parameters, pseudo-particles, AmpGen's daughter ordering
+and orbital rules, with covariant spin factors (`amplitf.covariant`) and
+AmpGen-convention lineshapes (`amplitf.ampgen_lineshapes`).
+`tfaex.models.d02kkpipi` uses it for the LHCb D0 -> K+ K- pi+ pi- model
+(AmpGen `options/DtoKKpipi_v2.opt`). So far only its Breit-Wigner,
+Gounaris-Sakurai and rho-omega terms are included
+(`params/ampgen/DtoKKpipi_stage1.opt`, 20 decay chains); every chain agrees
+with AmpGen to ~1e-5 (`tests/test_ampgen_d02kkpipi.py`, reference values
+described in `macros/ampgen/README.md`).
+
+```bash
+uv run python macros/d02kkpipi_fit.py      # generate toys and fit the 16 free couplings
+```
 
 ## Reference values from the C++ code
 

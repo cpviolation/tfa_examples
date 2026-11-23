@@ -1,0 +1,345 @@
+{
+ "_source": "AmpGen default particle properties (mass_width.csv, MintDalitzSpecialParticles.csv) at commit fc651a7, dumped with macros/ampgen/DumpTerms.cpp; masses, widths in GeV, radius in GeV^-1.",
+ "D0": {
+  "charge": 0,
+  "mass": 1.86484,
+  "parity": -1,
+  "pdg_id": 421,
+  "radius": 5.0,
+  "two_spin": 0,
+  "width": 1.605e-12
+ },
+ "K(1)(1270)+": {
+  "charge": 1,
+  "mass": 1.272,
+  "parity": 1,
+  "pdg_id": 10323,
+  "radius": 1.5,
+  "two_spin": 2,
+  "width": 0.09
+ },
+ "K(1)(1270)bar-": {
+  "charge": -1,
+  "mass": 1.272,
+  "parity": 1,
+  "pdg_id": -10323,
+  "radius": 1.5,
+  "two_spin": 2,
+  "width": 0.09
+ },
+ "K(1)(1400)+": {
+  "charge": 1,
+  "mass": 1.403,
+  "parity": 1,
+  "pdg_id": 20323,
+  "radius": 1.5,
+  "two_spin": 2,
+  "width": 0.17400000000000002
+ },
+ "K(1)(1400)bar-": {
+  "charge": -1,
+  "mass": 1.403,
+  "parity": 1,
+  "pdg_id": -20323,
+  "radius": 1.5,
+  "two_spin": 2,
+  "width": 0.17400000000000002
+ },
+ "K(2)*(1430)0": {
+  "charge": 0,
+  "mass": 1.4324000000000001,
+  "parity": 1,
+  "pdg_id": 315,
+  "radius": 1.5,
+  "two_spin": 4,
+  "width": 0.109
+ },
+ "K(2)*(1430)bar0": {
+  "charge": 0,
+  "mass": 1.4324000000000001,
+  "parity": 1,
+  "pdg_id": -315,
+  "radius": 1.5,
+  "two_spin": 4,
+  "width": 0.109
+ },
+ "K*(1680)0": {
+  "charge": 0,
+  "mass": 1.717,
+  "parity": -1,
+  "pdg_id": 30313,
+  "radius": 1.5,
+  "two_spin": 2,
+  "width": 0.32
+ },
+ "K*(1680)bar0": {
+  "charge": 0,
+  "mass": 1.717,
+  "parity": -1,
+  "pdg_id": -30313,
+  "radius": 1.5,
+  "two_spin": 2,
+  "width": 0.32
+ },
+ "K*(892)0": {
+  "charge": 0,
+  "mass": 0.896,
+  "parity": -1,
+  "pdg_id": 313,
+  "radius": 1.5,
+  "two_spin": 2,
+  "width": 0.0503
+ },
+ "K*(892)bar0": {
+  "charge": 0,
+  "mass": 0.896,
+  "parity": -1,
+  "pdg_id": -313,
+  "radius": 1.5,
+  "two_spin": 2,
+  "width": 0.0503
+ },
+ "K+": {
+  "charge": 1,
+  "mass": 0.49367700000000003,
+  "parity": -1,
+  "pdg_id": 321,
+  "radius": 1.5,
+  "two_spin": 0,
+  "width": 5.3520000000000005e-17
+ },
+ "K-": {
+  "charge": -1,
+  "mass": 0.49367700000000003,
+  "parity": -1,
+  "pdg_id": -321,
+  "radius": 1.5,
+  "two_spin": 0,
+  "width": 5.3520000000000005e-17
+ },
+ "KK00": {
+  "charge": 0,
+  "mass": 9.99,
+  "parity": 1,
+  "pdg_id": 998120,
+  "radius": 1.5,
+  "two_spin": 0,
+  "width": 9900000.0
+ },
+ "KK10": {
+  "charge": 0,
+  "mass": 9.99,
+  "parity": 1,
+  "pdg_id": 998121,
+  "radius": 1.5,
+  "two_spin": 0,
+  "width": 9900000.0
+ },
+ "KPi00": {
+  "charge": 0,
+  "mass": 9.98,
+  "parity": 1,
+  "pdg_id": 998110,
+  "radius": 1.5,
+  "two_spin": 0,
+  "width": 9900000.0
+ },
+ "KPi10": {
+  "charge": 0,
+  "mass": 9.98,
+  "parity": 1,
+  "pdg_id": 998111,
+  "radius": 1.5,
+  "two_spin": 0,
+  "width": 9900000.0
+ },
+ "KPi40": {
+  "charge": 0,
+  "mass": 9.98,
+  "parity": 1,
+  "pdg_id": 998114,
+  "radius": 1.5,
+  "two_spin": 0,
+  "width": 9900000.0
+ },
+ "KPi50": {
+  "charge": 0,
+  "mass": 9.98,
+  "parity": 1,
+  "pdg_id": 998115,
+  "radius": 1.5,
+  "two_spin": 0,
+  "width": 9900000.0
+ },
+ "KPi60": {
+  "charge": 0,
+  "mass": 9.98,
+  "parity": 1,
+  "pdg_id": 998116,
+  "radius": 1.5,
+  "two_spin": 0,
+  "width": 9900000.0
+ },
+ "KPi6bar0": {
+  "charge": 0,
+  "mass": 9.98,
+  "parity": 1,
+  "pdg_id": -998116,
+  "radius": 1.5,
+  "two_spin": 0,
+  "width": 9900000.0
+ },
+ "PiPi00": {
+  "charge": 0,
+  "mass": 9.97,
+  "parity": 1,
+  "pdg_id": 998100,
+  "radius": 1.5,
+  "two_spin": 0,
+  "width": 9900000.0
+ },
+ "PiPi20": {
+  "charge": 0,
+  "mass": 9.97,
+  "parity": 1,
+  "pdg_id": 998102,
+  "radius": 1.5,
+  "two_spin": 0,
+  "width": 9900000.0
+ },
+ "a(0)(980)0": {
+  "charge": 0,
+  "mass": 0.9847,
+  "parity": 1,
+  "pdg_id": 9000111,
+  "radius": 1.5,
+  "two_spin": 0,
+  "width": 0.075
+ },
+ "a(1)(1260)+": {
+  "charge": 1,
+  "mass": 1.23,
+  "parity": 1,
+  "pdg_id": 20213,
+  "radius": 1.5,
+  "two_spin": 2,
+  "width": 0.42
+ },
+ "a(1)(1260)-": {
+  "charge": -1,
+  "mass": 1.23,
+  "parity": 1,
+  "pdg_id": -20213,
+  "radius": 1.5,
+  "two_spin": 2,
+  "width": 0.42
+ },
+ "f(2)(1270)0": {
+  "charge": 0,
+  "mass": 1.2751,
+  "parity": 1,
+  "pdg_id": 225,
+  "radius": 1.5,
+  "two_spin": 4,
+  "width": 0.185
+ },
+ "omega(782)0": {
+  "charge": 0,
+  "mass": 0.78265,
+  "parity": -1,
+  "pdg_id": 223,
+  "radius": 1.5,
+  "two_spin": 2,
+  "width": 0.008490000000000001
+ },
+ "phi(1020)0": {
+  "charge": 0,
+  "mass": 1.019455,
+  "parity": -1,
+  "pdg_id": 333,
+  "radius": 1.5,
+  "two_spin": 2,
+  "width": 0.00426
+ },
+ "pi+": {
+  "charge": 1,
+  "mass": 0.13957018,
+  "parity": -1,
+  "pdg_id": 211,
+  "radius": 1.5,
+  "two_spin": 0,
+  "width": 2.5452000000000003e-17
+ },
+ "pi-": {
+  "charge": -1,
+  "mass": 0.13957018,
+  "parity": -1,
+  "pdg_id": -211,
+  "radius": 1.5,
+  "two_spin": 0,
+  "width": 2.5452000000000003e-17
+ },
+ "rho(1450)0": {
+  "charge": 0,
+  "mass": 1.465,
+  "parity": -1,
+  "pdg_id": 100113,
+  "radius": 1.5,
+  "two_spin": 2,
+  "width": 0.4
+ },
+ "rho(770)0": {
+  "charge": 0,
+  "mass": 0.77549,
+  "parity": -1,
+  "pdg_id": 113,
+  "radius": 1.5,
+  "two_spin": 2,
+  "width": 0.1494
+ },
+ "rhoOmega00": {
+  "charge": 0,
+  "mass": 9.99,
+  "parity": -1,
+  "pdg_id": 998130,
+  "radius": 1.5,
+  "two_spin": 2,
+  "width": 9900000.0
+ },
+ "rhoOmega10": {
+  "charge": 0,
+  "mass": 9.99,
+  "parity": -1,
+  "pdg_id": 998131,
+  "radius": 1.5,
+  "two_spin": 2,
+  "width": 9900000.0
+ },
+ "rhoOmega20": {
+  "charge": 0,
+  "mass": 9.99,
+  "parity": -1,
+  "pdg_id": 998132,
+  "radius": 1.5,
+  "two_spin": 2,
+  "width": 9900000.0
+ },
+ "rhoOmega30": {
+  "charge": 0,
+  "mass": 9.99,
+  "parity": -1,
+  "pdg_id": 998133,
+  "radius": 1.5,
+  "two_spin": 2,
+  "width": 9900000.0
+ },
+ "rhoOmega40": {
+  "charge": 0,
+  "mass": 9.99,
+  "parity": -1,
+  "pdg_id": 998134,
+  "radius": 1.5,
+  "two_spin": 2,
+  "width": 9900000.0
+ }
+}
