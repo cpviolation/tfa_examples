@@ -1,9 +1,0 @@
-jupyter
-particle
-tensorflow[and-cuda]
-tensorflow-probability[tf]
-scipy
-matplotlib
-numpy
-../AmpliTF
-../TFA2

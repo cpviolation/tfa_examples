@@ -1,148 +1,45 @@
-"""This macros calculates the strong phases in a given binning scenario for a toy sample
-generated according to the Belle model for D0 -> Kspipi.
+"""Compare the Belle model amplitude with the cached Belle amplitude, and compute the
+strong phases c_b, s_b in the bin-flip binning for a D0 -> KS pi pi toy sample.
 """
 
-import os, time, uproot
-# import NumPy
+import argparse
+import functools
+
 import numpy as np
-# Import Tensorflow
-import tensorflow as tf
-# Import AmpliTF modules
-import amplitf.interface as atfi
-import amplitf.kinematics as atfk
-import amplitf.dynamics as atfd
-import amplitf.likelihood as atfl
-import amplitf.mixing as atfm
-from amplitf.phasespace.dalitz_phasespace import DalitzPhaseSpace
-from amplitf.phasespace.decaytime_phasespace import DecayTimePhaseSpace
-from amplitf.phasespace.combined_phasespace import CombinedPhaseSpace
-#from amplitf.mixing import psip, psim, psii, mixing_density
-
-# Import TFA modules
-import tfa.toymc as tft
-import tfa.plotting as tfp
-import tfa.optimisation as tfo
-
-# Masses of final state particles
-from particle.particle import literals as lp
-
-# Import plotting module
+import uproot
 import matplotlib.pyplot as plt
 
-#from context import models
-from context import models
-from models.d02kspipi import babar2008_model_amp
-from models.helpers import decode_model, plot_data, plot_data_mix, plot_data_comparison_mix
+import amplitf.interface as atfi
 
-# from binflipfitter import add_binflip_binid
-from helpers import add_binflip_binid
+from tfaex import paths
+from tfaex.io import add_binflip_binid, load_belle_model
+from tfaex.models import belle2018
+from tfaex.models.d02kspipi import dalitz_phase_space
 
-# Import argparse for command line arguments
-import argparse
-# Set up command line argument parsing
-parser = argparse.ArgumentParser(description="Calculate strong phases for D0 -> Kspipi")
-parser.add_argument("--input", type=str, default=None, help="File name for the sample to calculate strong phases for", required=True)
-#parser.add_argument("--binning", type=str, default=None, help="Binning scheme to use for the calculation of strong phases")
-#parser.add_argument("--output", type=str, default='cb_', help="Output file name for the strong phases results")
-parser.add_argument("--dryrun", action="store_true", help="Run without executing the main function")
-args = parser.parse_args()
+phsp = dalitz_phase_space()
 
-# define some global variables 
-mkz = atfi.const(lp.K_S_0.mass/1000)
-mpi = atfi.const(lp.pi_plus.mass/1000)
-md = atfi.const(lp.D_0.mass/1000)
-meta = atfi.const(lp.eta.mass/1000.)
-metap = atfi.const(lp.etap_958.mass/1000.)
-belle_model = decode_model(os.environ['TFAEX_ROOT']+'/params/belle_model.txt')
 
-#Define the phase space for the decay D0 -> Kspipi.
-# Create Dalitz Phase Space
-phsp = DalitzPhaseSpace(mpi, mkz, mpi, md)
+def parse_args(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--input", type=str, default=None,
+                        help="Toy sample (.npy) for the strong phase calculation")
+    parser.add_argument("--dryrun", action="store_true", help="Parse the arguments and exit")
+    return parser.parse_args(argv)
 
-def babar_model_amp(x):
-    return babar2008_model_amp(x, phsp,
-        atfi.const(belle_model['rho770_Mass'][0]),
-        atfi.const(belle_model['rho770_Width'][0]),
-        atfi.const(belle_model['Kstar892_Mass'][0]),
-        atfi.const(belle_model['Kstar892_Width'][0]),
-        atfi.const(belle_model['Kstartwo1430_Mass'][0]),
-        atfi.const(belle_model['Kstartwo1430_Width'][0]),
-        atfi.const(belle_model['Kstar1410_Mass'][0]),
-        atfi.const(belle_model['Kstar1410_Width'][0]),
-        atfi.const(belle_model['Kstar1680_Mass'][0]),
-        atfi.const(belle_model['Kstar1680_Width'][0]),
-        atfi.const(belle_model['omega_Mass'][0]),
-        atfi.const(belle_model['omega_Width'][0]),
-        atfi.const(belle_model['ftwo1270_Mass'][0]),
-        atfi.const(belle_model['ftwo1270_Width'][0]),
-        atfi.const(belle_model['rho1450_Mass'][0]),
-        atfi.const(belle_model['rho1450_Width'][0]),
-        # LASS
-        atfi.const(belle_model['LASS_a'][0]),
-        atfi.const(belle_model['LASS_r'][0]),
-        atfi.const(1.4617),
-        atfi.const(0.2683),
-        atfi.const(belle_model['LASS_R'][0]),
-        atfi.const(belle_model['LASS_phi_R'][0]),
-        atfi.const(belle_model['LASS_F'][0]),
-        atfi.const(belle_model['LASS_phi_F'][0]),
-        # K matrix model parameters
-        atfi.const( [0.651, 1.2036, 1.55817, 1.21, 1.82206] ),
-        atfi.const( [ [0.22889, -0.55377, 0, -0.39899, -0.34639],
-                        [0.94128, 0.55095, 0, 0.39065, 0.31503],
-                        [0.36856, 0.23888, 0.55639, 0.18340, 0.18681],
-                        [0.33650, 0.40907, 0.85679, 0.19906, -0.00984],
-                        [0.18171, -0.17558, -0.79658, -0.00355, 0.22358]] ),
-        atfi.const(-3.92637),
-        atfi.const([ [  0.23399,  0.15044, -0.20545,  0.32825,  0.35412],
-                   [  0.15044, 0, 0, 0, 0],
-                   [ -0.20545, 0, 0, 0, 0],
-                   [  0.32825, 0, 0, 0, 0],
-                   [  0.35412, 0, 0, 0, 0]]),
-        atfi.stack([belle_model[f'Kmatrix_beta{i}_realpart'][0]+\
-                    1.j*belle_model[f'Kmatrix_beta{i}_imaginarypart'][0] for i in range(1, 6)]),
-        atfi.const(-0.070000000000000),
-        atfi.stack([belle_model[f'Kmatrix_f_prod_1{i}_realpart'][0]+\
-                    1.j*belle_model[f'Kmatrix_f_prod_1{i}_imaginarypart'][0] for i in range(1, 6)]),
-        [[mpi,mpi], [mkz, mkz], [mpi], [meta, meta], [meta, metap]])
 
-def Af(x, switches=[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0]):#15 * [1]):
-    return babar_model_amp(x)(
-        switches=switches,
-        a1r=atfi.const(1.0), 
-        a1i=atfi.const(0.0),
-        a2r=atfi.const(belle_model['Kstar892minus_realpart'][0]),
-        a2i=atfi.const(belle_model['Kstar892minus_imaginarypart'][0]),
-        a3r=atfi.const(belle_model['Kstarzero1430minus_realpart'][0]),
-        a3i=atfi.const(belle_model['Kstarzero1430minus_imaginarypart'][0]),
-        a4r=atfi.const(belle_model['Kstartwo1430minus_realpart'][0]),
-        a4i=atfi.const(belle_model['Kstartwo1430minus_imaginarypart'][0]),
-        a5r=atfi.const(belle_model['Kstar1410minus_realpart'][0]),
-        a5i=atfi.const(belle_model['Kstar1410minus_imaginarypart'][0]),
-        a6r=atfi.const(belle_model['Kstar1680minus_realpart'][0]),
-        a6i=atfi.const(belle_model['Kstar1680minus_imaginarypart'][0]),
-        a7r=atfi.const(belle_model['Kstar892plus_realpart'][0]),
-        a7i=atfi.const(belle_model['Kstar892plus_imaginarypart'][0]),
-        a8r=atfi.const(belle_model['Kstarzero1430plus_realpart'][0]),
-        a8i=atfi.const(belle_model['Kstarzero1430plus_imaginarypart'][0]),
-        a9r=atfi.const(belle_model['Kstartwo1430plus_realpart'][0]),
-        a9i=atfi.const(belle_model['Kstartwo1430plus_imaginarypart'][0]),
-        a10r=atfi.const(belle_model['Kstar1410plus_realpart'][0]),
-        a10i=atfi.const(belle_model['Kstar1410plus_imaginarypart'][0]),
-        a11r=atfi.const(belle_model['Kstar1680plus_realpart'][0]),
-        a11i=atfi.const(belle_model['Kstar1680plus_imaginarypart'][0]),
-        a12r=atfi.const(belle_model['omega_realpart'][0]),
-        a12i=atfi.const(belle_model['omega_imaginarypart'][0]),
-        a13r=atfi.const(belle_model['ftwo1270_realpart'][0]),
-        a13i=atfi.const(belle_model['ftwo1270_imaginarypart'][0]),
-        a14r=atfi.const(belle_model['rho1450_realpart'][0]),
-        a14i=atfi.const(belle_model['rho1450_imaginarypart'][0]),
-    )
+@functools.cache
+def _belle_model():
+    return load_belle_model()
+
+
+def Af(x, switches=belle2018.DEFAULT_SWITCHES):
+    return belle2018.amplitude(x, phsp, _belle_model(), switches)
+
 
 def Afbar(x):
-    # the conjugate of the amplitude
-    # is the same as the amplitude with the masses swapped
-    return Af(x[:,::-1])
+    # the D0bar amplitude is the D0 one with m2(KS pi+) <-> m2(KS pi-)
+    return Af(x[:, ::-1])
+
 
 def get_model_cache(model, xbins, ybins):
     # Create a grid of points at the center of each bin
@@ -171,7 +68,7 @@ def get_model_cache(model, xbins, ybins):
 
 
 def get_belle_cache():
-    belle_cache = uproot.open(os.environ['TFAEX_ROOT']+'/../d02kspipi_toys/generator/inputs/belle_cache.root')
+    belle_cache = uproot.open(paths.BELLE_CACHE)
     amp, xbins, ybins = belle_cache['histo_amplitude'].to_numpy()
     amp2, _, _ = belle_cache['histo_amplitude_squared'].to_numpy()
     phase, _, _ = belle_cache['histo_phase'].to_numpy()
@@ -369,8 +266,8 @@ def calculate_strong_phases(x):
     return delta_strong_original_order
 
 
-def load_data():
-    data = np.load(args.input)
+def load_data(file_name):
+    data = np.load(file_name)
     data = add_binflip_binid(data)
     return data
 
@@ -383,7 +280,11 @@ def get_uniform_phase_space_sample(n_events):
     return data
 
 
-def main():
+def main(argv=None):
+    args = parse_args(argv)
+    if args.dryrun:
+        print(args)
+        return
 
     # Compare the strong phases calculated from the cache with those calculated from the model
     belle_cache = get_belle_cache()
@@ -398,7 +299,7 @@ def main():
         axs.append(ax)
     plt.show()
 
-    # data = load_data()
+    # data = load_data(args.input)
     
     # # Calculate strong phase differences
     # print(f"Calculating strong phases for {len(data)} events...")
@@ -420,10 +321,4 @@ def main():
     return 
 
 if __name__ == "__main__":
-    if not args.dryrun:
-        main()
-
-
-### TODO:
-# Add a function to apply reconstruction efficiencies to the toy MC sample
-# Add a function to generate generator-level data on-demand
+    main()

@@ -1,0 +1,8 @@
+[submodule "external/AmpliTF"]
+	path = external/AmpliTF
+	url = https://github.com/cpviolation/AmpliTF.git
+	branch = master
+[submodule "external/TFA2"]
+	path = external/TFA2
+	url = https://github.com/cpviolation/TFA2.git
+	branch = master

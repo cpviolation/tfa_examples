@@ -5,6 +5,10 @@ from amplitf.phasespace.decaytime_phasespace import DecayTimePhaseSpace
 import amplitf.interface as atfi
 import tensorflow as tf
 import tensorflow_probability as tfp
+from scipy.integrate import simpson
+from scipy.stats import gengamma
+
+from tfaex.acceptance import decay_time_efficiency
 tfd = tfp.distributions
 
 @tf.function
@@ -34,11 +38,6 @@ def generalized_gamma(shape, d, p, a, dtype=tf.float32, seed=None):
     x = a * tf.pow(u, 1.0 / p)
     return x
 
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.stats import gengamma
-from scipy.integrate import simps
-
 # Define your PDF (up to normalization)
 def target_pdf(u, a, b, n, m, beta):
     return (u**a / (b + u**n))**m * np.exp(-beta * u)
@@ -58,13 +57,11 @@ def fit_gengamma_to_acceptance():
     pdf_vals = target_pdf(u_grid, a, b, n, m, beta)
 
     # Step 2: Normalize PDF
-    Z = simps(pdf_vals, u_grid)  # numerical integral
+    Z = simpson(pdf_vals, x=u_grid)  # numerical integral
     pdf_vals /= Z
 
     # Step 3: Sample from the PDF (approximate inverse transform)
     # We'll fit the PDF to a generalized gamma
-    from scipy.optimize import minimize
-
     # Generate a sample histogram as data
     rng = np.random.default_rng(42)
     cdf = np.cumsum(pdf_vals)
@@ -75,7 +72,7 @@ def fit_gengamma_to_acceptance():
     # Step 4: Fit a generalized gamma to the samples
     shape_a, shape_c, loc, scale = gengamma.fit(samples_from_pdf, floc=0)
 
-    print(f"Fitted generalized gamma parameters:")
+    print("Fitted generalized gamma parameters:")
     print(f"  shape c:     {shape_c}")
     print(f"  shape a:     {shape_a}")
     print(f"  loc:         {loc}")
@@ -101,8 +98,8 @@ def fit_gengamma_to_acceptance():
 
 
 def dt_acceptance(t, t0, a, b, beta, m, n):
-    dt = t-t0
-    return np.where( dt>=0, (dt**a / (b + dt**n))**m * np.exp(-beta * dt), 0)
+    """Efficiency (tfaex.acceptance.decay_time_efficiency) times exp(-beta (t - t0))."""
+    return decay_time_efficiency(t, t0, a, b, m, n) * np.where(t > t0, np.exp(-beta * (t - t0)), 0.0)
 
 def plot_dt_acceptance():
 
