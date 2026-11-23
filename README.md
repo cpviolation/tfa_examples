@@ -50,7 +50,8 @@ pip install -e external/AmpliTF -e external/TFA2 -e . pytest jupyter
 ## Usage
 
 ```bash
-uv run pytest                                   # run the tests
+uv run pytest                                   # run the tests (also run by CI on every push/PR)
+uv run pre-commit install                       # once per clone: strip notebook outputs on commit
 uv run python macros/d02kspipi_toys.py --ntoys 100000
 uv run python macros/binflipfitter.py
 uv run jupyter lab notebooks/
