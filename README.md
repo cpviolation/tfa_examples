@@ -16,7 +16,8 @@ src/tfaex/         installable package with the models and helpers
   plotting.py      standard plots
 macros/            command-line scripts (toys, fits, studies)
 notebooks/         exploratory notebooks
-params/, inputs/   model parameters and cached inputs
+params/            model parameters
+inputs/            cached model, parameter definitions, binning look-up tables
 tests/             pytest suite
 ```
 

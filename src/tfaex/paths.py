@@ -15,12 +15,11 @@ REPO_ROOT = Path(os.environ.get("TFAEX_ROOT", Path(__file__).resolve().parents[2
 
 PARAMS_DIR = REPO_ROOT / "params"
 INPUTS_DIR = REPO_ROOT / "inputs"
-FILES_DIR = REPO_ROOT / "notebooks" / "files"
 
 BELLE_MODEL = PARAMS_DIR / "belle_model.txt"
-BELLE_MODEL_DEFINITIONS = FILES_DIR / "belle_model_definitions.txt"
+BELLE_MODEL_DEFINITIONS = INPUTS_DIR / "belle_model_definitions.txt"
 BELLE_CACHE = INPUTS_DIR / "belle_cache.root"
-BINFLIP_LUT = FILES_DIR / "BinningLUT_K0Spipi_BABAR2008_EqualDeltadeltaD.root"
+BINFLIP_LUT = INPUTS_DIR / "BinningLUT_K0Spipi_BABAR2008_EqualDeltadeltaD.root"
 BINFLIP_LUT_HISTO = "h_BinningLUT_K0Spipi_BABAR2008_EqualDeltadeltaD"
 
 
