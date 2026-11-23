@@ -11,9 +11,11 @@ external/AmpliTF   git submodule (cpviolation fork, master)
 external/TFA2      git submodule (cpviolation fork, master)
 src/tfaex/         installable package with the models and helpers
   models/          amplitude models (d02kspipi, belle2018)
+  acceptance.py    decay-time efficiency for toys
   io.py            parameter files and binning look-up tables
   paths.py         locations of input files and of the output directory
   plotting.py      standard plots
+  reference.py     comparison with the C++ reference values
 macros/            command-line scripts (toys, fits, studies)
 notebooks/         exploratory notebooks
 params/            model parameters
@@ -53,6 +55,7 @@ pip install -e external/AmpliTF -e external/TFA2 -e . pytest jupyter
 uv run pytest                                   # run the tests (also run by CI on every push/PR)
 uv run pre-commit install                       # once per clone: strip notebook outputs on commit
 uv run python macros/d02kspipi_toys.py --ntoys 100000
+uv run python macros/d02kspipi_toys.py --acceptance 0.3 1.5 2.0 1.0 1.0   # with decay-time efficiency
 uv run python macros/binflipfitter.py
 uv run jupyter lab notebooks/
 ```
@@ -77,6 +80,9 @@ pars = fit_parameters({"Kstar892minus": -1.2 + 1.1j})   # Kstar892minus_re, Ksta
 `switches` is kept because TFA2 (`run_toymc`, `calculate_fit_fractions`) uses
 it to identify components. `tests/test_fit.py` shows a complete fit. The
 positional `babar2008_model_amp(...)(a1r, a1i, ...)` interface still works.
+
+Samples have columns m²(KSπ⁻), m²(KSπ⁺) [, t/τ] in GeV²
+(`tfaex.models.d02kspipi.dalitz_phase_space`).
 
 Macros write to `output/` (git-ignored); set `TFAEX_OUTPUT` to use another
 directory. Some notebooks still read `TFAEX_ROOT`: run `source setup.sh`

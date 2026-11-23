@@ -1,4 +1,7 @@
-"""Standard plots of D0 -> KS pi pi samples (with and without decay time)."""
+"""Standard plots of D0 -> KS pi pi samples (with and without decay time).
+
+Columns of the samples: m2(KS pi-), m2(KS pi+) [, t/tau], in GeV^2.
+"""
 
 import matplotlib.pyplot as plt
 import tfa.plotting as tfp
@@ -16,8 +19,8 @@ def plot_data(data, phsp):
         ranges=((0.3, 3.1), (0.3, 3.1)),
         fig=fig,
         ax=ax[0, 0],
-        labels=(r"$m^2(K_S^0\pi^+)$", r"$m^2(K_S^0\pi^-)$"),
-        units=("MeV$^2$", "MeV$^2$"),
+        labels=(r"$m^2(K_S^0\pi^-)$", r"$m^2(K_S^0\pi^+)$"),
+        units=("GeV$^2$", "GeV$^2$"),
         log=True,
     )
 
@@ -26,8 +29,8 @@ def plot_data(data, phsp):
         bins=50,
         range=(0.3, 3.1),
         ax=ax[0, 1],
-        label=r"$m^2(K_S^0\pi^+)$",
-        units="MeV$^2$",
+        label=r"$m^2(K_S^0\pi^-)$",
+        units="GeV$^2$",
     )
 
     tfp.plot_distr1d(
@@ -35,8 +38,8 @@ def plot_data(data, phsp):
         bins=50,
         range=(0.3, 3.1),
         ax=ax[1, 0],
-        label=r"$m^2(K_S^0\pi^-)$",
-        units="MeV$^2$",
+        label=r"$m^2(K_S^0\pi^+)$",
+        units="GeV$^2$",
     )
 
     tfp.plot_distr1d(
@@ -45,7 +48,7 @@ def plot_data(data, phsp):
         range=(0.05, 1.9),
         ax=ax[1, 1],
         label=r"$m^2(\pi^+\pi^-)$",
-        units="MeV$^2$",
+        units="GeV$^2$",
     )
 
     # Show the plot
@@ -66,7 +69,7 @@ def plot_data_mix(data, c_phsp):
         fig=fig,
         ax=ax[0, 0],
         labels=(r"$m^2(K_S^0\pi^-)$", r"$m^2(K_S^0\pi^+)$"),
-        units=("MeV$^2$", "MeV$^2$"),
+        units=("GeV$^2$", "GeV$^2$"),
         log=True,
     )
 
@@ -76,7 +79,7 @@ def plot_data_mix(data, c_phsp):
         range=(0.3, 3.1),
         ax=ax[0, 1],
         label=r"$m^2(K_S^0\pi^-)$",
-        units="MeV$^2$",
+        units="GeV$^2$",
     )
 
     tfp.plot_distr1d(
@@ -85,7 +88,7 @@ def plot_data_mix(data, c_phsp):
         range=(0.3, 3.1),
         ax=ax[1, 0],
         label=r"$m^2(K_S^0\pi^+)$",
-        units="MeV$^2$",
+        units="GeV$^2$",
     )
 
     tfp.plot_distr1d(
@@ -94,7 +97,7 @@ def plot_data_mix(data, c_phsp):
         range=(0.05, 1.9),
         ax=ax[1, 1],
         label=r"$m^2(\pi^+\pi^-)$",
-        units="MeV$^2$",
+        units="GeV$^2$",
     )
 
     tfp.plot_distr1d(
@@ -124,7 +127,7 @@ def plot_data_comparison_mix(data, c_phsp):
         range=(0.3, 3.1),
         ax=ax[0, 0],
         label=r"$m^2(K_S^0\pi^-)$",
-        units="MeV$^2$",
+        units="GeV$^2$",
         legend=False
     )
 
@@ -135,7 +138,7 @@ def plot_data_comparison_mix(data, c_phsp):
         range=(0.3, 3.1),
         ax=ax[0, 1],
         label=r"$m^2(K_S^0\pi^+)$",
-        units="MeV$^2$",
+        units="GeV$^2$",
         legend=False
     )
 
@@ -146,7 +149,7 @@ def plot_data_comparison_mix(data, c_phsp):
         range=(0.05, 1.9),
         ax=ax[1, 0],
         label=r"$m^2(\pi^+\pi^-)$",
-        units="MeV$^2$",
+        units="GeV$^2$",
         legend=False
     )
 
