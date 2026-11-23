@@ -1,24 +1,7 @@
-import os
+"""Standard plots of D0 -> KS pi pi samples (with and without decay time)."""
+
 import matplotlib.pyplot as plt
 import tfa.plotting as tfp
-
-def decode_model(fname):
-    parameter_names = {}
-    with open(os.environ['TFAEX_ROOT']+'/notebooks/files/belle_model_definitions.txt', 'r') as f:
-        for l in f:
-            values = l.split()
-            if len(values) == 0:
-                continue
-            parameter_names[values[1]] = values[0]    
-    model = {}
-    with open(fname, 'r') as f:
-        for l in f:
-            values = l.split()
-            if len(values) == 0:
-                continue
-            model[parameter_names[values[0]]] = [float(v) for v in values[1:]]
-    return model
-
 
 
 def plot_data(data, phsp):

@@ -4,13 +4,16 @@ Various models to describe D0->KSππ decay
 - Belle
 - BaBar
 """
+import functools
+
 import uproot
 import tensorflow as tf
 import amplitf.interface as atfi
 import amplitf.kinematics as atfk
 import amplitf.dynamics as atfd
-import amplitf.likelihood as atfl
 import amplitf.mixing as atfm
+
+from tfaex import paths
 
 
 def simple(x, phsp,
@@ -255,143 +258,14 @@ def LASS_babar2008(m2, a, r, m0, gamma0, ma, mb, amp_res, phase_res, amp_nr, pha
     return lass
 
 
-def babar2008_model(x, phsp,
-                    mrho, wrho, mkst, wkst,
-                    mk2st1430, wk2st1430,
-                    mkst1410, wkst1410,
-                    mkst1680, wkst1680,
-                    momega, womega,
-                    mf2_1270, wf2_1270,
-                    mrho1450, wrho1450,
-                    lass_a, lass_r, lass_M, lass_G, lass_R, lass_phiR, lass_F, lass_phiF,
-                    m_poles, g_poles, s0, fij, b_poles, K_matrix_sprod, fprod1,
-                    km_masses):
+def babar2008_model(x, phsp, *args, **kwargs):
+    """Density |A|^2 of :func:`babar2008_model_amp` (same arguments)."""
+    amp_model = babar2008_model_amp(x, phsp, *args, **kwargs)
 
-    m2ab = phsp.m2ab(x)
-    m2bc = phsp.m2bc(x)
-    m2ac = phsp.m2ac(x)
-    mab = atfi.sqrt(m2ab)
-    mbc = atfi.sqrt(m2bc)
-    mac = atfi.sqrt(m2ac)
-
-    # zemach tensors
-    hel_ab_1 = atfi.cast_complex(helicity_babar2008(mab,mbc,mac,phsp.ma,phsp.mb,phsp.mc,phsp.md,1))
-    hel_bc_1 = atfi.cast_complex(helicity_babar2008(mbc,mab,mac,phsp.mc,phsp.mb,phsp.ma,phsp.md,1))
-    hel_ac_1 = atfi.cast_complex(helicity_babar2008(mac,mbc,mab,phsp.ma,phsp.mc,phsp.mb,phsp.md,1))
-    hel_ab_2 = atfi.cast_complex(helicity_babar2008(mab,mbc,mac,phsp.ma,phsp.mb,phsp.mc,phsp.md,2))
-    hel_bc_2 = atfi.cast_complex(helicity_babar2008(mbc,mab,mac,phsp.mc,phsp.mb,phsp.ma,phsp.md,2))
-    hel_ac_2 = atfi.cast_complex(helicity_babar2008(mac,mbc,mab,phsp.ma,phsp.mc,phsp.mb,phsp.md,2))
-
-    bw1 = atfd.breit_wigner_lineshape(m2ac, mrho, wrho, phsp.ma, phsp.mc, phsp.mb, phsp.md, 1.5, 5.0, 1, 1, barrier_factor=False)
-    bw2 = atfd.breit_wigner_lineshape(m2ab, mkst, wkst, phsp.ma, phsp.mb, phsp.mc, phsp.md, 1.5, 5.0, 1, 1, barrier_factor=False)
-    #bw3 = amplitude_BW_tf(m2ab, wk0st1430, mk0st1430, 1, mpi, mkz, mpi, md)  # using LASS instead
-    bw4 = atfd.breit_wigner_lineshape(m2ab, mk2st1430, wk2st1430, phsp.ma, phsp.mb, phsp.mc, phsp.md, 1.5, 5.0, 2, 2, barrier_factor=False)
-    bw5 = atfd.breit_wigner_lineshape(m2ab, mkst1410, wkst1410, phsp.ma, phsp.mb, phsp.mc, phsp.md, 1.5, 5.0, 1, 1, barrier_factor=False)
-    bw6 = atfd.breit_wigner_lineshape(m2ab, mkst1680, wkst1680, phsp.ma, phsp.mb, phsp.mc, phsp.md, 1.5, 5.0, 1, 1, barrier_factor=False)
-    bw7 = atfd.breit_wigner_lineshape(m2bc, mkst, wkst, phsp.mc, phsp.mb, phsp.ma, phsp.md, 1.5, 5.0, 1, 1, barrier_factor=False)
-    #bw8 = amplitude_BW_tf(m2bc, wk0st1430, mk0st1430, 1, mpi, mkz, mpi, md) # using LASS instead
-    bw9 = atfd.breit_wigner_lineshape(m2bc, mk2st1430, wk2st1430, phsp.mc, phsp.mb, phsp.ma, phsp.md, 1.5, 5.0, 2, 2, barrier_factor=False)
-    bw10 = atfd.breit_wigner_lineshape(m2bc, mkst1410, wkst1410, phsp.mc, phsp.mb, phsp.ma, phsp.md, 1.5, 5.0, 1, 1, barrier_factor=False)
-    bw11 = atfd.breit_wigner_lineshape(m2bc, mkst1680, wkst1680, phsp.mc, phsp.mb, phsp.ma, phsp.md, 1.5, 5.0, 1, 1, barrier_factor=False)
-    bw12 = atfd.breit_wigner_lineshape(m2ac, momega, womega, phsp.ma, phsp.mc, phsp.mb, phsp.md, 1.5, 5.0, 1, 1, barrier_factor=False)
-    bw13 = atfd.breit_wigner_lineshape(m2ac, mf2_1270, wf2_1270, phsp.ma, phsp.mc, phsp.mb, phsp.md, 1.5, 5.0, 2, 2, barrier_factor=False)
-    bw14 = atfd.breit_wigner_lineshape(m2ac, mrho1450, wrho1450, phsp.ma, phsp.mc, phsp.mb, phsp.md, 1.5, 5.0, 1, 1, barrier_factor=False, md0=mrho1450 + phsp.mb)
-
-    # LASS
-    lass_n = LASS_babar2008(m2ab, lass_a, lass_r, lass_M, lass_G, phsp.mb, phsp.ma, lass_R, lass_phiR, lass_F, lass_phiF)
-    lass_p = LASS_babar2008(m2bc, lass_a, lass_r, lass_M, lass_G, phsp.mb, phsp.mc, lass_R, lass_phiR, lass_F, lass_phiF)
-
-    # K matrix
-    km = atfd.kmatrix_lineshape(
-        m2ac, m_poles, g_poles, s0, fij, b_poles, K_matrix_sprod, fprod1,
-        km_masses)
-
-    def _model(a1r,
-               a1i,
-               a2r,
-               a2i,
-               a3r,
-               a3i,
-               a4r,
-               a4i,
-               a5r,
-               a5i,
-               a6r,
-               a6i,
-               a7r,
-               a7i,
-               a8r,
-               a8i,
-               a9r,
-               a9i,
-               a10r,
-               a10i,
-               a11r,
-               a11i,
-               a12r,
-               a12i,
-               a13r,
-               a13i,
-               a14r,
-               a14i,
-               switches=15 * [1]+[0]):
-
-        a1 = atfi.complex(a1r, a1i)
-        a2 = atfi.complex(a2r, a2i)
-        a3 = atfi.complex(a3r, a3i)
-        a4 = atfi.complex(a4r, a4i)
-        a5 = atfi.complex(a5r, a5i)
-        a6 = atfi.complex(a6r, a6i)
-        a7 = atfi.complex(a7r, a7i)
-        a8 = atfi.complex(a8r, a8i)
-        a9 = atfi.complex(a9r, a9i)
-        a10 = atfi.complex(a10r, a10i)
-        a11 = atfi.complex(a11r, a11i)
-        a12 = atfi.complex(a12r, a12i)
-        a13 = atfi.complex(a13r, a13i)
-        a14 = atfi.complex(a14r, a14i)
-
-        ampl = atfi.cast_complex(atfi.ones(m2ab)) * atfi.complex(
-            atfi.const(0.0), atfi.const(0.0))
-
-        if switches[0]:
-            ampl += a1 * bw1 * hel_ac_1
-        if switches[1]:
-            ampl += a2 * bw2 * hel_ab_1
-        if switches[2]:
-            ampl += a3 * lass_n
-        if switches[3]:
-            ampl += a4 * bw4 * hel_ab_2
-        if switches[4]:
-            ampl += a5 * bw5 * hel_ab_1
-        if switches[5]:
-            ampl += a6 * bw6 * hel_ab_1
-        if switches[6]:
-            ampl += a7 * bw7 * hel_bc_1
-        if switches[7]:
-            ampl += a8 * lass_p
-        if switches[8]:
-            ampl += a9 * bw9 * hel_bc_2
-        if switches[9]:
-            ampl += a10 * bw10 * hel_bc_1
-        if switches[10]:
-            ampl += a11 * bw11 * hel_bc_1
-        if switches[11]:
-            ampl += a12 * bw12 * hel_ac_1
-        if switches[12]:
-            ampl += a13 * bw13 * hel_ac_2
-        if switches[13]:
-            ampl += a14 * bw14 * hel_ac_1
-        if switches[14]:
-            ampl += km
-        if switches[15]:
-            ampl += atfi.cast_complex(atfi.ones(m2ab)) * atfi.complex(
-                atfi.const(5.0), atfi.const(0.0))
-
-        return atfd.density(ampl)
+    def _model(*a, **kw):
+        return atfd.density(amp_model(*a, **kw))
 
     return _model
-
 
 
 def babar2008_model_amp(x, phsp,
@@ -532,15 +406,19 @@ def babar2008_model_amp(x, phsp,
     return _model
 
 
-def belle_cache_amp(x, phsp, file_name):
-    # Cached information
-    cached_model = uproot.open(file_name)
-    phase_values, binning_x, binning_y = cached_model["histo_phase"].to_numpy()
-    ampl_values, _, _ = cached_model["histo_amplitude"].to_numpy()
-    # calculate phase space variables for the input data
+@functools.lru_cache(maxsize=None)
+def _load_belle_cache(file_name):
+    with uproot.open(file_name) as cached_model:
+        phase_values, binning_x, binning_y = cached_model["histo_phase"].to_numpy()
+        ampl_values, _, _ = cached_model["histo_amplitude"].to_numpy()
+    return phase_values, ampl_values, binning_x, binning_y
+
+
+def belle_cache_amp(x, phsp, file_name=paths.BELLE_CACHE):
+    """Amplitude looked up from the binned Belle model in ``file_name``."""
+    phase_values, ampl_values, binning_x, binning_y = _load_belle_cache(str(file_name))
     m2ab = phsp.m2ab(x)
     m2bc = phsp.m2bc(x)
-    m2ac = phsp.m2ac(x)
     # get index of the bin for each event
     bin_x = tf.cast(tf.floor((m2ab - binning_x[0]) / (binning_x[1] - binning_x[0])), tf.int32)
     bin_y = tf.cast(tf.floor((m2bc - binning_y[0]) / (binning_y[1] - binning_y[0])), tf.int32)

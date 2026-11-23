@@ -1,0 +1,43 @@
+[project]
+name = "tfaex"
+version = "0.1.0"
+description = "Example amplitude models and studies built on AmpliTF and TFA2"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10,<3.13"
+dependencies = [
+    "amplitf",
+    "tfa2",
+    "tensorflow>=2.16",
+    "tensorflow-probability[tf]>=0.24",
+    "numpy",
+    "scipy>=1.11",
+    "matplotlib",
+    "uproot",
+    "particle",
+]
+
+[project.optional-dependencies]
+# Apple Silicon GPU support
+metal = ["tensorflow-metal; sys_platform == 'darwin'"]
+# NVIDIA GPU support
+cuda = ["tensorflow[and-cuda]; sys_platform == 'linux'"]
+
+[dependency-groups]
+dev = ["pytest", "jupyter"]
+
+# AmpliTF and TFA2 are git submodules (cpviolation forks): installed in editable
+# mode so that local changes to the core libraries are picked up immediately.
+[tool.uv.sources]
+amplitf = { path = "external/AmpliTF", editable = true }
+tfa2 = { path = "external/TFA2", editable = true }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/tfaex"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

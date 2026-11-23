@@ -5,6 +5,8 @@ from amplitf.phasespace.decaytime_phasespace import DecayTimePhaseSpace
 import amplitf.interface as atfi
 import tensorflow as tf
 import tensorflow_probability as tfp
+from scipy.integrate import simpson
+from scipy.stats import gengamma
 tfd = tfp.distributions
 
 @tf.function
@@ -34,11 +36,6 @@ def generalized_gamma(shape, d, p, a, dtype=tf.float32, seed=None):
     x = a * tf.pow(u, 1.0 / p)
     return x
 
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.stats import gengamma
-from scipy.integrate import simps
-
 # Define your PDF (up to normalization)
 def target_pdf(u, a, b, n, m, beta):
     return (u**a / (b + u**n))**m * np.exp(-beta * u)
@@ -58,13 +55,11 @@ def fit_gengamma_to_acceptance():
     pdf_vals = target_pdf(u_grid, a, b, n, m, beta)
 
     # Step 2: Normalize PDF
-    Z = simps(pdf_vals, u_grid)  # numerical integral
+    Z = simpson(pdf_vals, x=u_grid)  # numerical integral
     pdf_vals /= Z
 
     # Step 3: Sample from the PDF (approximate inverse transform)
     # We'll fit the PDF to a generalized gamma
-    from scipy.optimize import minimize
-
     # Generate a sample histogram as data
     rng = np.random.default_rng(42)
     cdf = np.cumsum(pdf_vals)

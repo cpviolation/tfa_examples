@@ -1,12 +1,15 @@
 import os
 import numpy as np
 import argparse
-import uproot
 import matplotlib.pyplot as plt
+
+from tfaex import paths
+from tfaex.io import add_binflip_binid
 
 parser = argparse.ArgumentParser(description="Run bin flip fitter for D0 -> Kspipi")
 parser.add_argument("--nevs", type=int, default=-1, help="Number of events to process")
 parser.add_argument("--nbins", type=int, default=10, help="Number of decay time bins")
+parser.add_argument("--input", type=str, default=None, help="Toy sample (.npy); defaults to <output dir>/d02kspipi_toy.npy")
 parser.add_argument("--dryrun", action="store_true", help="Run without executing the main function")
 args = parser.parse_args()
 
@@ -14,16 +17,6 @@ args = parser.parse_args()
 def order_dataset(data):
     # Order the dataset by decay time
     return data[data[:, 2].argsort()]
-
-
-def add_binflip_binid(data):
-    hf = uproot.open(os.environ['TFAEX_ROOT']+'/notebooks/files/BinningLUT_K0Spipi_BABAR2008_EqualDeltadeltaD.root')
-    hnp = hf['h_BinningLUT_K0Spipi_BABAR2008_EqualDeltadeltaD'].to_numpy()
-    ix = np.digitize(data[:,0], hnp[1]) - 1
-    iy = np.digitize(data[:,1], hnp[2]) - 1
-    binid = hnp[0][ix, iy] * (2 * (ix>iy) - 1)  # Flip sign if ix > iy
-    data = np.column_stack((data, binid))
-    return data
 
 
 def calculate_ratios(data):
@@ -83,7 +76,7 @@ def plot_data(data):
 
 
 def main():
-    data = np.load(os.environ['TFAEX_ROOT']+'/../output/d02kspipi_toy.npy')
+    data = np.load(args.input or paths.output_dir(create=False) / 'd02kspipi_toy.npy')
     if args.nevs > 0 and args.nevs < len(data):
         data = data[:args.nevs]
     data = order_dataset(data)
