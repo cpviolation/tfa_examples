@@ -10,12 +10,13 @@ Example amplitude models, toy studies and tests built on
 external/AmpliTF   git submodule (cpviolation fork, master)
 external/TFA2      git submodule (cpviolation fork, master)
 src/tfaex/         installable package with the models and helpers
-  models/          amplitude models (d02kspipi, belle2018)
+  models/          amplitude models (d02kspipi, belle2018, d02kkpipi)
   acceptance.py    decay-time efficiency for toys
   io.py            parameter files and binning look-up tables
   paths.py         locations of input files and of the output directory
   plotting.py      standard plots
   reference.py     comparison with the C++ reference values
+  ampgen.py        models from AmpGen options files
 macros/            command-line scripts (toys, fits, studies)
 notebooks/         exploratory notebooks
 params/            model parameters
@@ -88,6 +89,24 @@ Macros write to `output/` (git-ignored); set `TFAEX_OUTPUT` to use another
 directory. Some notebooks still read `TFAEX_ROOT`: run `source setup.sh`
 before starting Jupyter for those.
 
+## D0 -> K+ K- pi+ pi- with the AmpGen model
+
+`tfaex.ampgen` builds an amplitude model directly from an
+[AmpGen](https://github.com/GooFit/AmpGen) options file: decay descriptors and
+couplings, particle parameters, pseudo-particles, AmpGen's daughter ordering
+and orbital rules, with covariant spin factors (`amplitf.covariant`) and
+AmpGen-convention lineshapes (`amplitf.ampgen_lineshapes`).
+`tfaex.models.d02kkpipi` uses it for the LHCb D0 -> K+ K- pi+ pi- model
+(AmpGen `options/DtoKKpipi_v2.opt`). So far only its Breit-Wigner,
+Gounaris-Sakurai and rho-omega terms are included
+(`params/ampgen/DtoKKpipi_stage1.opt`, 20 decay chains); every chain agrees
+with AmpGen to ~1e-5 (`tests/test_ampgen_d02kkpipi.py`, reference values
+described in `macros/ampgen/README.md`).
+
+```bash
+uv run python macros/d02kkpipi_fit.py      # generate toys and fit the 16 free couplings
+```
+
 ## Reference values from the C++ code
 
 `inputs/d02kspipi_cpp_reference.npz` holds the Belle amplitude and each of its
@@ -125,3 +144,16 @@ It is advisable to add the upstream repositories as extra remotes:
 git -C external/AmpliTF remote add upstream git@github.com:apoluekt/AmpliTF.git
 git -C external/TFA2 remote add upstream git@github.com:apoluekt/TFA2.git
 ```
+
+## Licences
+
+tfa_examples is distributed under the MIT licence (`LICENSE`), except:
+
+- `params/ampgen/DtoKKpipi_stage1.opt` (modified excerpt of an AmpGen file) and
+  `macros/ampgen/DumpTerms.cpp` (builds against AmpGen): GPL-2.0-only, as
+  [AmpGen](https://github.com/GooFit/AmpGen); see `LICENSES/GPL-2.0-only.txt`;
+- `params/ampgen/particles.json`: particle properties from the PDG (2008 edition), see
+  `params/ampgen/README.md`.
+
+AmpliTF and TFA2 (`external/`) are separate projects with their own licences.
+

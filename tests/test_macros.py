@@ -17,13 +17,13 @@ def load(name):
 
 
 @pytest.mark.parametrize(
-    "name", ["d02kspipi_toys", "binflipfitter", "strong_phases", "acceptance", "make_cpp_reference"]
+    "name", ["d02kspipi_toys", "binflipfitter", "strong_phases", "acceptance", "make_cpp_reference", "d02kkpipi_fit"]
 )
 def test_import(name):
     load(name)
 
 
-@pytest.mark.parametrize("name", ["d02kspipi_toys", "binflipfitter", "strong_phases"])
+@pytest.mark.parametrize("name", ["d02kspipi_toys", "binflipfitter", "strong_phases", "d02kkpipi_fit"])
 def test_dryrun(name, capsys):
     load(name).main(["--dryrun"])
     assert "Namespace" in capsys.readouterr().out
