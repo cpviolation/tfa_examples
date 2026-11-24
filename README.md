@@ -97,14 +97,15 @@ couplings, particle parameters, pseudo-particles, AmpGen's daughter ordering
 and orbital rules, with covariant spin factors (`amplitf.covariant`) and
 AmpGen-convention lineshapes (`amplitf.ampgen_lineshapes`).
 `tfaex.models.d02kkpipi` uses it for the LHCb D0 -> K+ K- pi+ pi- model
-(AmpGen `options/DtoKKpipi_v2.opt`). So far only its Breit-Wigner,
-Gounaris-Sakurai and rho-omega terms are included
-(`params/ampgen/DtoKKpipi_stage1.opt`, 20 decay chains); every chain agrees
-with AmpGen to ~1e-5 (`tests/test_ampgen_d02kkpipi.py`, reference values
-described in `macros/ampgen/README.md`).
+(AmpGen `options/DtoKKpipi_v2.opt`, copied unmodified to
+`params/ampgen/DtoKKpipi_v2.opt`): 55 decay chains with Breit-Wigner,
+Gounaris-Sakurai, rho-omega, a0(980) Flatte, FOCUS K pi S-wave, AmpGen's
+pi pi / K K K-matrix and spline running-width (K1(1270), a1(1260)) lineshapes.
+Every chain agrees with AmpGen to ~1e-5 (`tests/test_ampgen_d02kkpipi.py`,
+reference values described in `macros/ampgen/README.md`).
 
 ```bash
-uv run python macros/d02kkpipi_fit.py      # generate toys and fit the 16 free couplings
+uv run python macros/d02kkpipi_fit.py      # generate toys and fit the 25 free D0 couplings
 ```
 
 ## Reference values from the C++ code
@@ -149,7 +150,7 @@ git -C external/TFA2 remote add upstream git@github.com:apoluekt/TFA2.git
 
 tfa_examples is distributed under the MIT licence (`LICENSE`), except:
 
-- `params/ampgen/DtoKKpipi_stage1.opt` (modified excerpt of an AmpGen file) and
+- `params/ampgen/DtoKKpipi_v2.opt` (copy of an AmpGen file) and
   `macros/ampgen/DumpTerms.cpp` (builds against AmpGen): GPL-2.0-only, as
   [AmpGen](https://github.com/GooFit/AmpGen); see `LICENSES/GPL-2.0-only.txt`;
 - `params/ampgen/particles.json`: particle properties from the PDG (2008 edition), see

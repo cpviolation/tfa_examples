@@ -16,7 +16,10 @@ spin factors of :mod:`amplitf.covariant` and the AmpGen-convention lineshapes of
 - pseudo-particles with a single daughter (e.g. ``rhoOmega00``) have no lineshape;
   their decays are expanded with their own couplings.
 
-Only the lineshapes and spin factors validated against AmpGen are supported;
+Only the lineshapes and spin factors validated against AmpGen are supported:
+``BW``, ``GounarisSakurai``, ``FormFactor``, ``Flatte`` (a0(980) only),
+``FOCUS.{Kpi,KEta,I32}``, ``kMatrix.{pole,poleKK,prod,prodKK}.<n>`` and
+``GSpline`` (with ``<particle>::Spline`` knots in the options file);
 anything else raises ``NotImplementedError``.
 """
 
@@ -35,7 +38,8 @@ import amplitf.interface as atfi
 
 STABLE_THRESHOLD = 1e-6  # GeV, AmpGen Particle::StableThreshold (1 keV)
 SPIN_LETTER = {0: "S", 2: "V", 4: "T"}
-SUPPORTED_LINESHAPES = {"BW", "GounarisSakurai", "FormFactor"}
+SUPPORTED_LINESHAPES = {"BW", "GounarisSakurai", "FormFactor", "Flatte", "FOCUS", "kMatrix", "GSpline"}
+ORBITALS = ("S", "P", "D", "F")
 
 
 # ----------------------------------------------------------------------------
@@ -97,6 +101,7 @@ class Options:
     couplings: dict  # descriptor -> (complex value, is_free)
     parameters: dict  # name -> (value, is_free)
     ignored: list
+    splines: dict = field(default_factory=dict)  # particle -> (n knots, min s, max s)
 
 
 def _resolve_expression(expr, values):
@@ -120,7 +125,7 @@ def read_options(file_name):
     imaginary (or magnitude and phase) parts of couplings via ``_Re``/``_Im``.
     """
     event_type, polar = None, False
-    raw_couplings, raw_params, aliases, ignored = {}, {}, [], []
+    raw_couplings, raw_params, aliases, ignored, splines = {}, {}, [], [], {}
     for line in Path(file_name).read_text().splitlines():
         line = line.split("#", 1)[0].strip()
         if not line:
@@ -135,8 +140,8 @@ def read_options(file_name):
             event_type = tokens[1:]
         elif key == "CouplingConstant::Coordinates":
             polar = tokens[1] == "polar"
-        elif "::" in key:
-            ignored.append(line)
+        elif key.endswith("::Spline") and len(tokens) == 4:
+            splines[key[:-len("::Spline")]] = (int(tokens[1]), float(tokens[2]), float(tokens[3]))
         elif len(tokens) == 7:
             raw_couplings[key] = (float(tokens[2]), float(tokens[5]), tokens[1] != "2" or tokens[4] != "2")
         elif len(tokens) == 4:
@@ -161,7 +166,7 @@ def read_options(file_name):
     for name, (a, b, free) in raw_couplings.items():
         couplings[name] = (cmath.rect(a, b) if polar else complex(a, b), free)
     params = {k: (values[k], free) for k, (_, free) in raw_params.items()}
-    return Options(event_type, couplings, params, ignored)
+    return Options(event_type, couplings, params, ignored, splines)
 
 
 # ----------------------------------------------------------------------------
@@ -170,7 +175,7 @@ def read_options(file_name):
 class Particle:
     """A node of an expanded decay chain, with AmpGen's ordering and orbital rules."""
 
-    def __init__(self, decay, table, params, final_state, is_head=False):
+    def __init__(self, decay, table, params, final_state, is_head=False, splines=None):
         self.name = decay.name
         self.modifiers = list(decay.modifiers)
         if self.name not in table:
@@ -182,7 +187,8 @@ class Particle:
         self.width = params.get(self.name + "_width", props["width"])
         self.radius = params.get(self.name + "_radius", props["radius"])
         self.is_head = is_head
-        self.daughters = [Particle(d, table, params, final_state) for d in decay.daughters]
+        self.table, self.params, self.splines = table, params, splines or {}
+        self.daughters = [Particle(d, table, params, final_state, splines=splines) for d in decay.daughters]
         self.index = final_state.index(self.name) if not self.daughters else None
         self._sort_daughters()
         self.L = self._orbital()
@@ -224,8 +230,8 @@ class Particle:
     # --- orbital angular momentum
     def _orbital(self):
         for m in self.modifiers:
-            if m in ("S", "P", "D", "F"):
-                return "SPDF".index(m)
+            if m in ORBITALS:
+                return ORBITALS.index(m)
         if len(self.daughters) != 2:
             return 0
         j, j1, j2 = self.two_spin, self.daughters[0].two_spin, self.daughters[1].two_spin
@@ -239,25 +245,39 @@ class Particle:
 
     @property
     def lineshape_name(self):
-        named = [m for m in self.modifiers if m not in ("S", "P", "D", "F")]
+        named = [m for m in self.modifiers if m not in ORBITALS]
         if named:
             return named[0]
         return "FormFactor" if self.width < STABLE_THRESHOLD else "BW"
 
     def descriptor(self):
-        mods = [m for m in self.modifiers]
-        if len(self.daughters) == 2 and self.L != self._default_orbital() and not any(m in "SPDF" for m in mods):
-            mods.append("SPDF"[self.L])
+        """AmpGen's unique string: orbital label only if not the default, then the lineshape."""
+        mods = ["SPDF"[self.L]] if len(self.daughters) == 2 and self.L != self._default_orbital() else []
+        mods += [m for m in self.modifiers if m not in ORBITALS]
         m = f"[{';'.join(mods)}]" if mods else ""
         ds = "{" + ",".join(d.descriptor() for d in self.daughters) + "}" if self.daughters else ""
         return self.name + m + ds
 
     def _default_orbital(self):
         saved = self.modifiers
-        self.modifiers = [m for m in saved if m not in ("S", "P", "D", "F")]
+        self.modifiers = [m for m in saved if m not in ORBITALS]
         L = self._orbital()
         self.modifiers = saved
         return L
+
+    def param(self, name, default):
+        """A lineshape parameter from the options file, else AmpGen's default."""
+        return self.params.get(name, default)
+
+    def kmatrix_parameters(self):
+        """Parameters of AmpGen's ``kMatrix`` lineshape for this (pseudo-)particle."""
+        p, poles = self.params, range(1, 6)
+        return dict(
+            pole_masses=[p[f"IS_p{n}_mass"] for n in poles],
+            pole_couplings=[[p[f"IS_p{n}_{ch}"] for ch in agl.KMATRIX_CHANNELS] for n in poles],
+            f_scatt=[p[f"f_scatt{i}"] for i in range(len(agl.KMATRIX_CHANNELS))],
+            s0_scatt=self.param("s0_scatt", -3.92637), sA0=self.param("sA0", -0.15), sA=self.param("sA", 1.0),
+            s0_prod=self.param(self.name + "_s0_prod", -0.07))
 
     # --- evaluation
     def momentum(self, p):
@@ -277,15 +297,30 @@ class Particle:
             return self.daughters[0].lineshape(p, mpi)
         s = self.mass_squared(p)
         s1, s2 = self.daughters[0].mass_squared(p), self.daughters[1].mass_squared(p)
-        name = self.lineshape_name
+        name, _, modifier = self.lineshape_name.partition(".")
         if name == "FormFactor":
             own = atfi.cast_complex(agl.form_factor_signed(s, s1, s2, self.radius, self.L))
         elif name == "BW":
             own = agl.breit_wigner(s, s1, s2, self.mass, self.width, self.radius, self.L)
         elif name == "GounarisSakurai":
             own = agl.gounaris_sakurai(s, s1, s2, self.mass, self.width, self.radius, self.L, mpi)
+        elif name == "Flatte" and self.name == "a(0)(980)0" and modifier in ("", "kFactor"):
+            own = agl.flatte_a0(s, self.mass, self.param("Flatte::g2pieta", 0.175),
+                                self.param("Flatte::g2KK_by_g2pieta", 1.20), self.table["pi+"]["mass"],
+                                self.table["eta0"]["mass"], self.table["K+"]["mass"], kfactor=modifier == "kFactor")
+        elif name == "FOCUS" and modifier in ("Kpi", "KEta", "I32"):
+            own = agl.focus_kpi(s, modifier, self.table["K+"]["mass"], self.table["pi+"]["mass"],
+                                self.table["eta'(958)0"]["mass"])
+        elif name == "kMatrix" and re.fullmatch(r"(pole|poleKK|prod|prodKK)\.\d", modifier):
+            term, index = modifier.split(".")
+            own = agl.kmatrix_ampgen(s, term, int(index), **self.kmatrix_parameters())
+        elif name == "GSpline" and modifier in ("", "EFF") and self.name in self.splines:
+            n, xmin, xmax = self.splines[self.name]
+            values = [self.params[f"{self.name}::Spline::Gamma::{i}"] for i in range(n)]
+            own = agl.gspline(s, s1, s2, self.mass, self.width, self.radius, self.L, values, xmin, xmax,
+                              form_factor="EFF" if modifier == "EFF" else "BlattWeisskopf")
         else:
-            raise NotImplementedError(f"Lineshape '{name}' of {self.name} is not implemented")
+            raise NotImplementedError(f"Lineshape '{self.lineshape_name}' of {self.name} is not implemented")
         return own * self.daughters[0].lineshape(p, mpi) * self.daughters[1].lineshape(p, mpi)
 
     def spin_tensor(self, p):
@@ -330,7 +365,8 @@ class AmpGenModel:
             decay = parse_descriptor(rule)
             if decay.name == self.head:
                 for expanded, rules in self._expand(decay):
-                    particle = Particle(expanded, self.table, self.params, self.final_state, is_head=True)
+                    particle = Particle(expanded, self.table, self.params, self.final_state, is_head=True,
+                                        splines=self.options.splines)
                     self.chains.append(Chain(particle, [rule] + rules))
         if not self.chains:
             raise ValueError(f"No decays of {self.head} in {options_file}")
