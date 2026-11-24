@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: GPL-2.0-only
+// Builds against AmpGen (https://github.com/GooFit/AmpGen, GPL-2.0), so this file is
+// distributed under the GPL-2.0, not under the MIT licence of tfa_examples.
+//
 // Dump AmpGen amplitudes term by term at phase-space events, as JSON reference values.
 #include <complex>
 #include <fstream>

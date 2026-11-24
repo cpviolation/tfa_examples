@@ -144,3 +144,16 @@ It is advisable to add the upstream repositories as extra remotes:
 git -C external/AmpliTF remote add upstream git@github.com:apoluekt/AmpliTF.git
 git -C external/TFA2 remote add upstream git@github.com:apoluekt/TFA2.git
 ```
+
+## Licences
+
+tfa_examples is distributed under the MIT licence (`LICENSE`), except:
+
+- `params/ampgen/DtoKKpipi_stage1.opt` (modified excerpt of an AmpGen file) and
+  `macros/ampgen/DumpTerms.cpp` (builds against AmpGen): GPL-2.0-only, as
+  [AmpGen](https://github.com/GooFit/AmpGen); see `LICENSES/GPL-2.0-only.txt`;
+- `params/ampgen/particles.json`: particle properties from the PDG (2008 edition), see
+  `params/ampgen/README.md`.
+
+AmpliTF and TFA2 (`external/`) are separate projects with their own licences.
+

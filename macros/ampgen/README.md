@@ -32,3 +32,10 @@ json.dump({"_source": "AmpGen <commit>", **d["particles"]}, open("params/ampgen/
 ```
 
 The `Fitter` application of AmpGen `fc651a7` does not compile with recent clang; it is not needed.
+
+## Licence
+
+`DumpTerms.cpp` builds against AmpGen, which is distributed under the GPL-2.0, so
+this file is distributed under the GPL-2.0-only
+([`LICENSES/GPL-2.0-only.txt`](../../LICENSES/GPL-2.0-only.txt)), not under the MIT
+licence of the rest of tfa_examples. `dump_settings.opt` is a plain list of settings.

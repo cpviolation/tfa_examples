@@ -1,5 +1,5 @@
 {
- "_source": "AmpGen default particle properties (mass_width.csv, MintDalitzSpecialParticles.csv) at commit fc651a7, dumped with macros/ampgen/DumpTerms.cpp; masses, widths in GeV, radius in GeV^-1.",
+ "_source": "Particle properties from the Review of Particle Physics, 2008 edition (C. Amsler et al. (Particle Data Group), Phys. Lett. B 667, 1 (2008)), as compiled in AmpGen's mass_width.csv, plus AmpGen's pseudo-particles (MintDalitzSpecialParticles.csv), at AmpGen commit fc651a7; dumped with macros/ampgen/DumpTerms.cpp. Masses and widths in GeV, radius in GeV^-1.",
  "D0": {
   "charge": 0,
   "mass": 1.86484,
