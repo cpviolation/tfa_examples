@@ -1,8 +1,7 @@
 """Generate and fit D0 -> K+ K- pi+ pi- toys with the AmpGen-defined model.
 
-The model (params/ampgen/DtoKKpipi_stage1.opt) is the LHCb amplitude model as
-defined in AmpGen, restricted for now to its Breit-Wigner / Gounaris-Sakurai /
-rho-omega terms. Toys are generated with the AmpGen couplings; the free
+The model (params/ampgen/DtoKKpipi_v2.opt) is the LHCb amplitude model as
+defined in AmpGen. Toys are generated with the AmpGen couplings; the free
 couplings of the options file are then fitted, starting from shifted values.
 The normalisation integral uses points generated from the model at the starting
 couplings, weighted by 1/pdf (importance sampling); --uniform-norm uses uniform
@@ -19,7 +18,6 @@ import numpy as np
 import amplitf.interface as atfi
 import amplitf.likelihood as atfl
 import tfa.optimisation as tfo
-import tfa.toymc as tft
 
 from tfaex import paths
 from tfaex.models import d02kkpipi
@@ -44,14 +42,6 @@ def parse_args(argv=None):
 def free_head_rules(model):
     """Free couplings of D0 decays in the options file (sub-decay couplings stay fixed)."""
     return [r for r in model.free_couplings if r.startswith(model.head)]
-
-
-def generate(model, phsp, ntoys, seed=None):
-    def pdf(x):
-        return d02kkpipi.pdf_model(model, phsp, x)()
-
-    # maximum=1e-20: run_toymc finds the maximum itself
-    return tft.run_toymc(pdf, phsp, ntoys, maximum=1.0e-20, chunk=200000, seed=seed, components=False)
 
 
 def starting_couplings(model, rules, shift, seed):
@@ -117,7 +107,7 @@ def main(argv=None):
     print(f"{len(model.chains)} decay chains, {len(rules)} free D0 couplings")
 
     start = time.time()
-    data = generate(model, phsp, args.ntoys, seed=args.seed)
+    data = d02kkpipi.generate(model, phsp, args.ntoys, seed=args.seed)
     start_couplings = starting_couplings(model, rules, args.shift, args.seed)
     norm, norm_weights = d02kkpipi.normalisation_sample(
         model, phsp, args.nnorm, start_couplings, seed=args.seed + 1000, uniform=args.uniform_norm)

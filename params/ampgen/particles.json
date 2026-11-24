@@ -234,6 +234,24 @@
   "two_spin": 2,
   "width": 0.42
  },
+ "eta'(958)0": {
+  "charge": 0,
+  "mass": 0.95766,
+  "parity": -1,
+  "pdg_id": 331,
+  "radius": 1.5,
+  "two_spin": 0,
+  "width": 0.000205
+ },
+ "eta0": {
+  "charge": 0,
+  "mass": 0.5478529999999999,
+  "parity": -1,
+  "pdg_id": 221,
+  "radius": 1.5,
+  "two_spin": 0,
+  "width": 1.3e-06
+ },
  "f(2)(1270)0": {
   "charge": 0,
   "mass": 1.2751,
